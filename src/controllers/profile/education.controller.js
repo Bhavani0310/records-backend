@@ -4,6 +4,7 @@ const Joi = require("joi");
 const User = require("../../models/user.model");
 const Profile_Verification = require("../../models/profile_verification.model");
 const Education = require("../../models/profile/education.model");
+const Staff = require("../../models/staff.model");
 
 // Importing Constants
 const HttpStatusConstant = require("../../constants/http-message.constant");
@@ -70,6 +71,14 @@ exports.handleAddEducation = async (req, res) => {
         });
 
         if (!skipVerification) {
+            const staff = await Staff.findOne({ email: verifierEmail });
+            if (!staff) {
+                return res.status(HttpStatusCode.NotFound).json({
+                    status: HttpStatusConstant.NOT_FOUND,
+                    code: HttpStatusCode.NotFound,
+                    message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                });
+            }
             await Profile_Verification.create({
                 userId,
                 verificationId: generatedVerificationId,
@@ -197,6 +206,14 @@ exports.handleUpdateEducation = async (req, res) => {
 
             if (!verificationId) {
                 toAddressEmail = verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
                 await Profile_Verification.create({
                     userId,
                     verificationId: generatedVerificationId,
@@ -208,6 +225,14 @@ exports.handleUpdateEducation = async (req, res) => {
                     await Profile_Verification.findOne({ verificationId });
                 // handle if profile verification response not found
                 toAddressEmail = profileVerificationResponse.verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
             }
 
             const isEmailSend = await handleSendEmail({

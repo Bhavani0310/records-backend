@@ -170,11 +170,35 @@ module.exports = {
     revisionController: {
         handleEducationRevisionErrorLog:
             "🚀 ~ file: revision.controller.js ~ handleEducationRevision ~ err",
+        handleWorkExperienceRevisionErrorLog:
+            "🚀 ~ file: revision.controller.js ~ handleWorkExperienceRevision ~ err",
+        handleLicenseCertificationRevisionErrorLog:
+            "🚀 ~ file: revision.controller.js ~ handleLicenseCertificationRevision ~ err",
+        handleProjectRevisionErrorLog:
+            "🚀 ~ file: revision.controller.js ~ handleProjectRevision ~ err",
+        handleActivityRevisionErrorLog:
+            "🚀 ~ file: revision.controller.js ~ handleActivityRevision ~ err",
     },
     verificationController: {
         handleGetVerifyEducationDetailsErrorLog:
             "🚀 ~ file: verification.controller.js ~ handleGetVerifyEducationDetails ~ err",
         handleVerifyEducationErrorLog:
             "🚀 ~ file: verification.controller.js ~ handleVerifyEducation ~ err",
+        handleGetVerifyWorkExperienceDetailsErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleGetVerifyWorkExperienceDetails ~ err",
+        handleVerifyWorkExperienceErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleVerifyWorkExperience ~ err",
+        handleGetVerifyLicenseCertificationDetailsErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleGetVerifyLicenseCertificationDetails ~ err",
+        handleVerifyLicenseCertificationErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleVerifyLicenseCertification ~ err",
+        handleGetVerifyProjectDetailsErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleGetVerifyProjectDetails ~ err",
+        handleVerifyProjectErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleVerifyProject ~ err",
+        handleGetVerifyActivityDetailsErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleGetVerifyActivityDetails ~ err",
+        handleVerifyActivityErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleVerifyActivity ~ err",
     },
 };

@@ -3,6 +3,8 @@ const router = express.Router();
 
 // Importing middlewares
 const verifyUser = require("../middlewares/user.mw");
+const verifyStaff = require("../middlewares/staff.mw");
+const verifyRole = require("../middlewares/verifyRole.mw");
 
 // Importing routes
 const authRoute = require("./auth.route");
@@ -28,12 +30,22 @@ router.use("/authstaff", authstaffRoute);
 router.use("/user", verifyUser, userRoute);
 router.use("/tools", verifyUser, toolsRoute);
 router.use("/learnings", verifyUser, learningsRoute);
-router.use("/skill", verifyUser, skillRoute);
-router.use("/skill-category", verifyUser, skillCategoryRoute);
+router.use("/skill", skillRoute);
+router.use("/skill-category", skillCategoryRoute);
 
 // Staff Routes
-router.use("/revision", revisionRoute);
-router.use("/verify", verificationRoute);
+router.use(
+    "/revision",
+    verifyStaff,
+    verifyRole(["Administrator", "Staff"]),
+    revisionRoute,
+);
+router.use(
+    "/verify",
+    verifyStaff,
+    verifyRole(["Administrator", "Staff"]),
+    verificationRoute,
+);
 router.use("/dashboard", dashboardRoute);
 router.use("/students", studentsRoute);
 router.use("/placement", placementRoute);

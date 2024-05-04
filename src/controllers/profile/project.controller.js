@@ -5,6 +5,7 @@ const Project = require("../../models/profile/project.model");
 const User = require("../../models/user.model");
 const Profile_Verification = require("../../models/profile_verification.model");
 const Skill = require("../../models/skill.model");
+const Staff = require("../../models/staff.model");
 
 // Importing Constants
 const HttpStatusConstant = require("../../constants/http-message.constant");
@@ -18,6 +19,9 @@ const generateUUID = require("../../helpers/uuid.helper");
 
 // Importing Controllers
 const handleSendEmail = require("../email.controller");
+
+// Importing Utils
+const emailTemplates = require("../../utils/emailTemplates");
 
 exports.handleAddProject = async (req, res) => {
     try {
@@ -89,6 +93,14 @@ exports.handleAddProject = async (req, res) => {
         });
 
         if (!skipVerification) {
+            const staff = await Staff.findOne({ email: verifierEmail });
+            if (!staff) {
+                return res.status(HttpStatusCode.NotFound).json({
+                    status: HttpStatusConstant.NOT_FOUND,
+                    code: HttpStatusCode.NotFound,
+                    message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                });
+            }
             await Profile_Verification.create({
                 userId,
                 verificationId: generatedVerificationId,
@@ -102,9 +114,15 @@ exports.handleAddProject = async (req, res) => {
                 subject: CommonConstant.email.verificationOfProject.subject(
                     userProfile.username,
                     projectName,
-                    projectLink,
+                    associatedWith,
                 ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the Project details <a href="${process.env.EMAIL_BASE_URL}/verify-project/${generatedVerificationId}">Verfiy Project</a></p>`,
+                htmlData: emailTemplates.projectVerificationRequest(
+                    "Project",
+                    userProfile.username,
+                    projectName,
+                    associatedWith,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {
@@ -228,6 +246,14 @@ exports.handleUpdateProject = async (req, res) => {
 
             if (!verificationId) {
                 toAddressEmail = verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
                 await Profile_Verification.create({
                     userId,
                     verificationId: generatedVerificationId,
@@ -239,6 +265,14 @@ exports.handleUpdateProject = async (req, res) => {
                     await Profile_Verification.findOne({ verificationId });
                 // handle if profile verification response not found
                 toAddressEmail = profileVerificationResponse.verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
             }
 
             const isEmailSend = await handleSendEmail({
@@ -247,9 +281,15 @@ exports.handleUpdateProject = async (req, res) => {
                 subject: CommonConstant.email.verificationOfProject.subject(
                     userProfile.username,
                     projectName,
-                    projectLink,
+                    associatedWith,
                 ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the Project details <a href="${process.env.EMAIL_BASE_URL}/verify-project/${generatedVerificationId}">Verfiy Project</a></p>`,
+                htmlData: emailTemplates.projectVerificationRequest(
+                    "Project",
+                    userProfile.username,
+                    projectName,
+                    associatedWith,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {

@@ -4,22 +4,54 @@ const router = express.Router();
 // Importing controllers
 const verificationController = require("../controllers/verification.controller");
 
-// Importing middlewares
-const verifyStaff = require("../middlewares/staff.mw");
-const verifyRole = require("../middlewares/verifyRole.mw");
-
 router.put(
     "/education/:verificationId",
-    verifyStaff,
-    verifyRole(["Administrator", "Staff"]),
     verificationController.handleVerifyEducation,
 );
 
 router.get(
     "/education/:verificationId",
-    verifyStaff,
-    verifyRole(["Administrator", "Staff"]),
     verificationController.handleGetVerifyEducationDetails,
+);
+
+router.put(
+    "/workexperience/:verificationId",
+    verificationController.handleVerifyWorkExperience,
+);
+
+router.get(
+    "/workexperience/:verificationId",
+    verificationController.handleGetVerifyWorkExperienceDetails,
+);
+
+router.put(
+    "/licensecertification/:verificationId",
+    verificationController.handleVerifyLicenseCertification,
+);
+
+router.get(
+    "/licensecertification/:verificationId",
+    verificationController.handleGetVerifyActivityDetails,
+);
+
+router.put(
+    "/project/:verificationId",
+    verificationController.handleVerifyProject,
+);
+
+router.get(
+    "/project/:verificationId",
+    verificationController.handleGetVerifyProjectDetails,
+);
+
+router.put(
+    "/activity/:verificationId",
+    verificationController.handleVerifyActivity,
+);
+
+router.get(
+    "/activity/:verificationId",
+    verificationController.handleGetVerifyActivityDetails,
 );
 
 module.exports = router;

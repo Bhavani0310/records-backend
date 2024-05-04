@@ -4,6 +4,7 @@ const Joi = require("joi");
 const Activity = require("../../models/profile/activity.model");
 const User = require("../../models/user.model");
 const Profile_Verification = require("../../models/profile_verification.model");
+const Staff = require("../../models/staff.model");
 
 // Importing Constants
 const HttpStatusConstant = require("../../constants/http-message.constant");
@@ -17,6 +18,9 @@ const generateUUID = require("../../helpers/uuid.helper");
 
 // Importing Controllers
 const handleSendEmail = require("../email.controller");
+
+// Importing Utils
+const emailTemplates = require("../../utils/emailTemplates");
 
 exports.handleAddActivity = async (req, res) => {
     try {
@@ -64,6 +68,14 @@ exports.handleAddActivity = async (req, res) => {
         });
 
         if (!skipVerification) {
+            const staff = await Staff.findOne({ email: verifierEmail });
+            if (!staff) {
+                return res.status(HttpStatusCode.NotFound).json({
+                    status: HttpStatusConstant.NOT_FOUND,
+                    code: HttpStatusCode.NotFound,
+                    message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                });
+            }
             await Profile_Verification.create({
                 userId,
                 verificationId: generatedVerificationId,
@@ -79,7 +91,13 @@ exports.handleAddActivity = async (req, res) => {
                     activityName,
                     organisation,
                 ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the Activity details <a href="${process.env.EMAIL_BASE_URL}/verify-activity/${generatedVerificationId}">Verfiy Activity</a></p>`,
+                htmlData: emailTemplates.activityVerificationRequest(
+                    "Activity",
+                    userProfile.username,
+                    activityName,
+                    organisation,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {
@@ -180,6 +198,14 @@ exports.handleUpdateActivity = async (req, res) => {
 
             if (!verificationId) {
                 toAddressEmail = verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
                 await Profile_Verification.create({
                     userId,
                     verificationId: generatedVerificationId,
@@ -191,6 +217,14 @@ exports.handleUpdateActivity = async (req, res) => {
                     await Profile_Verification.findOne({ verificationId });
                 // handle if profile verification response not found
                 toAddressEmail = profileVerificationResponse.verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
             }
 
             const isEmailSend = await handleSendEmail({
@@ -201,7 +235,13 @@ exports.handleUpdateActivity = async (req, res) => {
                     activityName,
                     organisation,
                 ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the Activity details <a href="${process.env.EMAIL_BASE_URL}/verify-activity/${generatedVerificationId}">Verfiy Activity</a></p>`,
+                htmlData: emailTemplates.activityVerificationRequest(
+                    "Activity",
+                    userProfile.username,
+                    activityName,
+                    organisation,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {

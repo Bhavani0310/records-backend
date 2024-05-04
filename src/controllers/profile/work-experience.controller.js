@@ -5,6 +5,7 @@ const WorkExperience = require("../../models/profile/work-experience.model");
 const User = require("../../models/user.model");
 const Profile_Verification = require("../../models/profile_verification.model");
 const Skill = require("../../models/skill.model");
+const Staff = require("../../models/staff.model");
 
 // Importing Constants
 const HttpStatusConstant = require("../../constants/http-message.constant");
@@ -15,6 +16,9 @@ const ErrorLogConstant = require("../../constants/error-log.constant");
 
 // Importing Helpers
 const generateUUID = require("../../helpers/uuid.helper");
+
+// Importing Utils
+const emailTemplates = require("../../utils/emailTemplates");
 
 // Importing Controllers
 const handleSendEmail = require("../email.controller");
@@ -92,6 +96,15 @@ exports.handleAddWorkExperience = async (req, res) => {
         });
 
         if (!skipVerification) {
+            const staff = await Staff.findOne({ email: verifierEmail });
+            if (!staff) {
+                return res.status(HttpStatusCode.NotFound).json({
+                    status: HttpStatusConstant.NOT_FOUND,
+                    code: HttpStatusCode.NotFound,
+                    message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                });
+            }
+
             await Profile_Verification.create({
                 userId,
                 verificationId: generatedVerificationId,
@@ -107,8 +120,16 @@ exports.handleAddWorkExperience = async (req, res) => {
                         userProfile.username,
                         role,
                         employeeId,
+                        companyName,
                     ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the work experience details <a href="${process.env.EMAIL_BASE_URL}/verify-work-experience/${generatedVerificationId}">Verfiy Work Experience</a></p>`,
+                htmlData: emailTemplates.workExperienceVerificationRequest(
+                    "Experience",
+                    userProfile.username,
+                    role,
+                    employeeId,
+                    companyName,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {
@@ -238,6 +259,14 @@ exports.handleUpdateWorkExperience = async (req, res) => {
 
             if (!verificationId) {
                 toAddressEmail = verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
                 await Profile_Verification.create({
                     userId,
                     verificationId: generatedVerificationId,
@@ -249,6 +278,14 @@ exports.handleUpdateWorkExperience = async (req, res) => {
                     await Profile_Verification.findOne({ verificationId });
                 // handle if profile verification response not found
                 toAddressEmail = profileVerificationResponse.verifierEmail;
+                const staff = await Staff.findOne({ email: toAddressEmail });
+                if (!staff) {
+                    return res.status(HttpStatusCode.NotFound).json({
+                        status: HttpStatusConstant.NOT_FOUND,
+                        code: HttpStatusCode.NotFound,
+                        message: ResponseMessageConstant.STAFF_NOT_FOUND,
+                    });
+                }
             }
 
             const isEmailSend = await handleSendEmail({
@@ -259,8 +296,16 @@ exports.handleUpdateWorkExperience = async (req, res) => {
                         userProfile.username,
                         role,
                         employeeId,
+                        companyName,
                     ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the work experience details <a href="${process.env.EMAIL_BASE_URL}/verify-work-experience/${generatedVerificationId}">Verfiy Work Experience</a></p>`,
+                htmlData: emailTemplates.workExperienceVerificationRequest(
+                    "Experience",
+                    userProfile.username,
+                    role,
+                    employeeId,
+                    companyName,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {

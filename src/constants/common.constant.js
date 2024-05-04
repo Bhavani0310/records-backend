@@ -16,16 +16,16 @@ module.exports = {
                 `Record: Verification of education of ${username}, ${degree} in ${branch} in ${institution}`,
         },
         verificationOfWorkExperience: {
-            subject: (name, role, employeeId) =>
-                `Record: Verification of employment to ${name}, ${role} (${employeeId})`,
+            subject: (name, role, employeeId, companyName) =>
+                `Record: Verification of employment of ${name}, ${role} (${employeeId}) in ${companyName}`,
         },
         verificationOfLicenseCertification: {
             subject: (name, certificationName, credentialId) =>
                 `Record: Verification of Licenses and Certification of ${name}, ${certificationName} (${credentialId})`,
         },
         verificationOfProject: {
-            subject: (name, projectName, projectLink) =>
-                `Record: Verification of Project of ${name}, ${projectName} (${projectLink})`,
+            subject: (name, projectName, associatedWith) =>
+                `Record: Verification of Project of ${name}, ${projectName} (${associatedWith})`,
         },
         verificationOfActivity: {
             subject: (name, activityName, organisation) =>
@@ -37,6 +37,18 @@ module.exports = {
         },
         educationRevisionRequest: {
             subject: "Record: Education details revision request",
+        },
+        workExperienceRevisionRequest: {
+            subject: "Record: Experience details revision request",
+        },
+        licenseCertificationRevisionRequest: {
+            subject: "Record: License & Certification details revision request",
+        },
+        projectRevisionRequest: {
+            subject: "Record: Project details revision request",
+        },
+        activityRevisionRequest: {
+            subject: "Record: Activity details revision request",
         },
     },
 };

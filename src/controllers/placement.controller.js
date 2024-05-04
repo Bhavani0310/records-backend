@@ -21,6 +21,9 @@ const Job = require("../models/job.model");
 // Importing Controllers
 const handleSendEmail = require("./email.controller");
 
+// Importing Utils
+const emailTemplates = require("../utils/emailTemplates");
+
 exports.handleGetPlacementHomePage = async (req, res) => {
     try {
         const { staffId } = req.staffSession;
@@ -276,8 +279,26 @@ exports.handleCreateJob = async (req, res) => {
             );
 
             if (allDepartmentsExist) {
+                const students = await User.find({
+                    departmentId: { $in: departments },
+                });
+
+                const otherJobOpportunities = {};
+
+                for (const departmentId of departments) {
+                    const jobs = await Job.find({
+                        departments: departmentId,
+                    });
+
+                    if (!otherJobOpportunities[departmentId]) {
+                        otherJobOpportunities[departmentId] = [];
+                    }
+
+                    otherJobOpportunities[departmentId].push(...jobs);
+                }
+
                 const jobId = generateUUID();
-                await Job.create({
+                const postedJob = await Job.create({
                     jobId,
                     institutionId,
                     companyName,
@@ -292,10 +313,6 @@ exports.handleCreateJob = async (req, res) => {
                     postedOn: new Date().toISOString().split("T")[0],
                 });
 
-                const students = await User.find({
-                    departmentId: { $in: departments },
-                });
-
                 for (const student of students) {
                     const isEmailSend = await handleSendEmail({
                         toAddresses: [student.email],
@@ -304,30 +321,12 @@ exports.handleCreateJob = async (req, res) => {
                             companyName,
                             jobDesignation,
                         ),
-                        htmlData: ` <div class="container">
-                                        <div class="header">
-                                            <h2>Job Recommendation</h2>
-                                        </div>
-                                        <div class="content">
-                                            <p>
-                                                Dear ${student.username},
-                                                <br>
-                                                Your college is recommending you to apply for the following opportunity:
-                                            </p>
-                                            <p>
-                                                <strong>Company Name:</strong> ${companyName} <br>
-                                                <strong>Job Designation:</strong> ${jobDesignation} <br>
-                                                <strong>Job Location:</strong> ${jobLocation} <br>
-                                                <strong>Openings:</strong> ${openings}
-                                            </p>
-                                            <p>
-                                                <a href="#">Apply Now</a>
-                                            </p>
-                                        </div>
-                                    </div>
-                                `,
+                        htmlData: emailTemplates.jobOpportunity(
+                            student.username,
+                            postedJob,
+                            otherJobOpportunities[student.departmentId],
+                        ),
                     });
-
                     if (!isEmailSend) {
                         return res
                             .status(HttpStatusCode.InternalServerError)

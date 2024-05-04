@@ -4,15 +4,29 @@ const router = express.Router();
 // Importing controllers
 const revisionController = require("../controllers/revision.controller");
 
-// Importing middlewares
-const verifyStaff = require("../middlewares/staff.mw");
-const verifyRole = require("../middlewares/verifyRole.mw");
-
 router.put(
     "/education/:verificationId",
-    verifyStaff,
-    verifyRole(["Administrator", "Staff"]),
     revisionController.handleEducationRevision,
+);
+
+router.put(
+    "/workexperience/:verificationId",
+    revisionController.handleWorkExperienceRevision,
+);
+
+router.put(
+    "/licensecertification/:verificationId",
+    revisionController.handleLicenseCertificationRevision,
+);
+
+router.put(
+    "/project/:verificationId",
+    revisionController.handleProjectRevision,
+);
+
+router.put(
+    "/activity/:verificationId",
+    revisionController.handleActivityRevision,
 );
 
 module.exports = router;
