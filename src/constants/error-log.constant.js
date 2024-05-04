@@ -154,5 +154,7 @@ module.exports = {
     studentsController: {
         handleGetStudentProfileErrorLog:
             "🚀 ~ file: students.controller.js ~ handleGetStudentProfile ~ err",
+        handleGetStudentsHomePageErrorLog:
+            "🚀 ~ file: students.controller.js ~ handleGetStudentsHomePage ~ err",
     },
 };

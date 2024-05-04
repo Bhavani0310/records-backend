@@ -9,7 +9,14 @@ const verifyStaff = require("../middlewares/staff.mw");
 const verifyRole = require("../middlewares/verifyRole.mw");
 
 router.get(
-    "/profile/:studentId",
+    "/",
+    verifyStaff,
+    verifyRole(["Administrator"]),
+    studentsController.handleGetStudentsHomePage,
+);
+
+router.get(
+    "/profile/:stundetId",
     verifyStaff,
     verifyRole(["Administrator", "Staff"]),
     studentsController.handleGetStudentProfile,

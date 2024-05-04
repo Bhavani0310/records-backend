@@ -12,7 +12,11 @@ const userSchema = new mongoose.Schema(
         fullName: { type: String, required: false },
         profilePicture: { type: String, required: false },
         dateOfBirth: { type: String, required: false },
-        gender: { type: String, required: false },
+        gender: {
+            type: String,
+            enum: ["male", "female"],
+            required: false,
+        },
         mobile: { type: String, required: false },
         about: { type: String, required: false },
         socialMedia: {
