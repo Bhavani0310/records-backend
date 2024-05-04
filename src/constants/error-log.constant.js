@@ -156,5 +156,9 @@ module.exports = {
             "🚀 ~ file: students.controller.js ~ handleGetStudentProfile ~ err",
         handleGetStudentsHomePageErrorLog:
             "🚀 ~ file: students.controller.js ~ handleGetStudentsHomePage ~ err",
+        handleGetStudentDepartmentPageAdminErrorLog:
+            "🚀 ~ file: students.controller.js ~ handleGetStudentDepartmentPageAdmin ~ err",
+        handleGetStudentDepartmentPageStaffErrorLog:
+            "🚀 ~ file: students.controller.js ~ handleGetStudentDepartmentPageStaff ~ err",
     },
 };

@@ -434,6 +434,14 @@ exports.handleGetStudentsHomePage = async (req, res) => {
             },
             {
                 $lookup: {
+                    from: "educations",
+                    localField: "student.userId",
+                    foreignField: "userId",
+                    as: "educations",
+                },
+            },
+            {
+                $lookup: {
                     from: "workexperiences",
                     localField: "student.userId",
                     foreignField: "userId",
@@ -478,6 +486,14 @@ exports.handleGetStudentsHomePage = async (req, res) => {
                 learningHoursSum += dailyLearning.learned;
             }
             learningHoursSum = Math.round(learningHoursSum / 3600);
+
+            const education = student.educations.find(
+                (edu) => edu.institution === institution.name,
+            );
+            const rollNumber = education ? education.rollNumber : null;
+            const startMonthYear = education ? education.startMonthYear : null;
+            const endMonthYear = education ? education.endMonthYear : null;
+
             const departmentData = await Department.findOne({
                 departmentId: student.student.departmentId,
             });
@@ -504,6 +520,9 @@ exports.handleGetStudentsHomePage = async (req, res) => {
                 username: student.student.username,
                 departmentId: student.student.departmentId,
                 institutionId: student.student.institutionId,
+                rollNumber: rollNumber,
+                startMonthYear: startMonthYear,
+                endMonthYear: endMonthYear,
                 verifiedSkillCount: 0, // Initialize count of verified skills
                 departmentName: null, // Initialize department name
             };
@@ -573,6 +592,420 @@ exports.handleGetStudentsHomePage = async (req, res) => {
     } catch (error) {
         console.log(
             ErrorLogConstant.studentsController.handleGetStudentProfileErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleGetStudentDepartmentPageAdmin = async (req, res) => {
+    try {
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const { departmentId } = req.params;
+
+        const department = await Department.findOne({
+            institutionId,
+            departmentId,
+        });
+
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
+        const students = await User.aggregate([
+            {
+                $match: {
+                    departmentId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "educations",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "educations",
+                },
+            },
+            {
+                $lookup: {
+                    from: "workexperiences",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "workExperiences",
+                },
+            },
+            {
+                $lookup: {
+                    from: "licensecertifications",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "licenceCertifications",
+                },
+            },
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "projects",
+                },
+            },
+        ]);
+
+        const startEndDates = getStartAndEndDate(
+            new Date().toISOString().split("T")[0],
+        );
+
+        let learningHoursSum = 0;
+        let activeStudents = 0;
+        let totalRoleBasedSkills = 0;
+        let totalInterestBasedSkills = 0;
+
+        const skillCount = {};
+
+        const studentDetails = [];
+
+        for (const student of students) {
+            const education = student.educations.find(
+                (edu) => edu.institution === institution.name,
+            );
+            const rollNumber = education ? education.rollNumber : null;
+            const startMonthYear = education ? education.startMonthYear : null;
+            const endMonthYear = education ? education.endMonthYear : null;
+            const studentInfo = {
+                userId: student.userId,
+                departmentName: department.name,
+                username: student.username,
+                rollNumber: rollNumber,
+                startMonthYear: startMonthYear,
+                endMonthYear: endMonthYear,
+            };
+            studentDetails.push(studentInfo);
+
+            const dailyLearnings = await Daily_Learning.find({
+                userId: student.userId,
+                date: {
+                    $gte: startEndDates.monthStart,
+                    $lte: startEndDates.monthEnd,
+                },
+            });
+
+            for (const dailyLearning of dailyLearnings) {
+                learningHoursSum += dailyLearning.learned;
+            }
+
+            if (student.isActive) {
+                activeStudents++;
+            }
+
+            for (const workExp of student.workExperiences) {
+                for (const skill of workExp.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const license of student.licenceCertifications) {
+                for (const skill of license.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const project of student.projects) {
+                for (const skill of project.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+        }
+
+        let totalCount = totalRoleBasedSkills + totalInterestBasedSkills;
+
+        const skillIds = Object.keys(skillCount);
+        const skillWithCount = {};
+        for (const skillId of skillIds) {
+            const skill = await Skill.findOne({ skillId: skillId });
+            const skillName = skill.skillName;
+            if (skillName) {
+                skillWithCount[skillName] = (
+                    (skillCount[skillId] / totalCount) *
+                    100
+                ).toFixed(2);
+            }
+        }
+
+        const totalMontlyHoursOfInvolvement = Math.round(
+            learningHoursSum / 3600,
+        );
+
+        return res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.OK,
+            code: HttpStatusCode.Ok,
+            data: {
+                departmentName: department.name,
+                totalMontlyHoursOfInvolvement,
+                activeStudents,
+                totalRoleBasedSkills,
+                totalInterestBasedSkills,
+                skillWithCount,
+                studentDetails,
+            },
+        });
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.studentsController
+                .handleGetStudentDepartmentPageAdminErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleGetStudentDepartmentPageStaff = async (req, res) => {
+    try {
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const departmentId = staff.departmentId;
+
+        const department = await Department.findOne({
+            institutionId,
+            departmentId,
+        });
+
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
+        const students = await User.aggregate([
+            {
+                $match: {
+                    departmentId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "educations",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "educations",
+                },
+            },
+            {
+                $lookup: {
+                    from: "workexperiences",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "workExperiences",
+                },
+            },
+            {
+                $lookup: {
+                    from: "licensecertifications",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "licenceCertifications",
+                },
+            },
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "projects",
+                },
+            },
+        ]);
+
+        const startEndDates = getStartAndEndDate(
+            new Date().toISOString().split("T")[0],
+        );
+
+        let learningHoursSum = 0;
+        let activeStudents = 0;
+        let totalRoleBasedSkills = 0;
+        let totalInterestBasedSkills = 0;
+
+        const skillCount = {};
+
+        const studentDetails = [];
+
+        for (const student of students) {
+            const education = student.educations.find(
+                (edu) => edu.institution === institution.name,
+            );
+            const rollNumber = education ? education.rollNumber : null;
+            const startMonthYear = education ? education.startMonthYear : null;
+            const endMonthYear = education ? education.endMonthYear : null;
+            const studentInfo = {
+                userId: student.userId,
+                departmentName: department.name,
+                username: student.username,
+                rollNumber: rollNumber,
+                startMonthYear: startMonthYear,
+                endMonthYear: endMonthYear,
+            };
+            studentDetails.push(studentInfo);
+
+            const dailyLearnings = await Daily_Learning.find({
+                userId: student.userId,
+                date: {
+                    $gte: startEndDates.monthStart,
+                    $lte: startEndDates.monthEnd,
+                },
+            });
+
+            for (const dailyLearning of dailyLearnings) {
+                learningHoursSum += dailyLearning.learned;
+            }
+
+            if (student.isActive) {
+                activeStudents++;
+            }
+
+            for (const workExp of student.workExperiences) {
+                for (const skill of workExp.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const license of student.licenceCertifications) {
+                for (const skill of license.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const project of student.projects) {
+                for (const skill of project.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+        }
+
+        let totalCount = totalRoleBasedSkills + totalInterestBasedSkills;
+
+        const skillIds = Object.keys(skillCount);
+        const skillWithCount = {};
+        for (const skillId of skillIds) {
+            const skill = await Skill.findOne({ skillId: skillId });
+            const skillName = skill.skillName;
+            if (skillName) {
+                skillWithCount[skillName] = (
+                    (skillCount[skillId] / totalCount) *
+                    100
+                ).toFixed(2);
+            }
+        }
+
+        const totalMontlyHoursOfInvolvement = Math.round(
+            learningHoursSum / 3600,
+        );
+
+        return res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.OK,
+            code: HttpStatusCode.Ok,
+            data: {
+                departmentName: department.name,
+                totalMontlyHoursOfInvolvement,
+                activeStudents,
+                totalRoleBasedSkills,
+                totalInterestBasedSkills,
+                skillWithCount,
+                studentDetails,
+            },
+        });
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.studentsController
+                .handleGetStudentDepartmentPageStaffErrorLog,
             error.message,
         );
         res.status(HttpStatusCode.InternalServerError).json({

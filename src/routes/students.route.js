@@ -18,8 +18,22 @@ router.get(
 router.get(
     "/profile/:stundetId",
     verifyStaff,
-    verifyRole(["Administrator", "Staff"]),
+    verifyRole(["Administrator"]),
     studentsController.handleGetStudentProfile,
+);
+
+router.get(
+    "/department/:departmentId",
+    verifyStaff,
+    verifyRole(["Administrator"]),
+    studentsController.handleGetStudentDepartmentPageAdmin,
+);
+
+router.get(
+    "/department",
+    verifyStaff,
+    verifyRole(["Staff"]),
+    studentsController.handleGetStudentDepartmentPageStaff,
 );
 
 module.exports = router;
