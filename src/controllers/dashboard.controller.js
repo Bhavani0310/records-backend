@@ -5,6 +5,11 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user.model");
 const Daily_Learning = require("../models/daily_learning.model");
 const SkillCategory = require("../models/skill-category.model");
+const Institution = require("../models/institution.model");
+const Department = require("../models/department.model");
+const Staff = require("../models/staff.model");
+const Skill = require("../models/skill.model");
+const Job = require("../models/job.model");
 
 // Importing Constants
 const HttpStatusConstant = require("../constants/http-message.constant");
@@ -452,6 +457,701 @@ exports.handleGetDashboard = async (req, res) => {
     } catch (error) {
         console.log(
             ErrorLogConstant.dashboardController.handleGetDashboardErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleGetStaffDepartmentDashboard = async (req, res) => {
+    try {
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const departmentId = staff.departmentId;
+
+        const department = await Department.findOne({
+            institutionId,
+            departmentId,
+        });
+
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
+        const students = await User.aggregate([
+            {
+                $match: {
+                    departmentId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "educations",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "educations",
+                },
+            },
+            {
+                $lookup: {
+                    from: "workexperiences",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "workExperiences",
+                },
+            },
+            {
+                $lookup: {
+                    from: "licensecertifications",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "licenceCertifications",
+                },
+            },
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "projects",
+                },
+            },
+        ]);
+
+        const startEndDates = getStartAndEndDate(
+            new Date().toISOString().split("T")[0],
+        );
+
+        let learningHoursSum = 0;
+        let activeStudents = 0;
+        let totalRoleBasedSkills = 0;
+        let totalInterestBasedSkills = 0;
+
+        const skillCount = {};
+
+        const studentDetails = [];
+
+        for (const student of students) {
+            const dailyLearnings = await Daily_Learning.find({
+                userId: student.userId,
+                date: {
+                    $gte: startEndDates.monthStart,
+                    $lte: startEndDates.monthEnd,
+                },
+            });
+            let studentLearningHours = 0;
+            for (const dailyLearning of dailyLearnings) {
+                learningHoursSum += dailyLearning.learned;
+                studentLearningHours += dailyLearning.learned;
+            }
+            studentLearningHours = Math.round(studentLearningHours / 3600);
+            const education = student.educations.find(
+                (edu) => edu.institution === institution.name,
+            );
+            const rollNumber = education ? education.rollNumber : null;
+            const startMonthYear = education ? education.startMonthYear : null;
+            const endMonthYear = education ? education.endMonthYear : null;
+            const studentInfo = {
+                userId: student.userId,
+                departmentName: department.name,
+                username: student.username,
+                rollNumber: rollNumber,
+                studentLearningHours: studentLearningHours,
+                startMonthYear: startMonthYear,
+                endMonthYear: endMonthYear,
+            };
+            studentDetails.push(studentInfo);
+
+            if (student.isActive) {
+                activeStudents++;
+            }
+
+            for (const workExp of student.workExperiences) {
+                for (const skill of workExp.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const license of student.licenceCertifications) {
+                for (const skill of license.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const project of student.projects) {
+                for (const skill of project.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+        }
+
+        studentDetails.sort(
+            (a, b) => b.studentLearningHours - a.studentLearningHours,
+        );
+
+        const top10MostActiveStudents = studentDetails.slice(0, 10);
+
+        let totalCount = totalRoleBasedSkills + totalInterestBasedSkills;
+
+        const skillIds = Object.keys(skillCount);
+        const skillWithCount = {};
+        for (const skillId of skillIds) {
+            const skill = await Skill.findOne({ skillId: skillId });
+            const skillName = skill.skillName;
+            if (skillName) {
+                skillWithCount[skillName] = (
+                    (skillCount[skillId] / totalCount) *
+                    100
+                ).toFixed(2);
+            }
+        }
+
+        const totalMontlyHoursOfInvolvement = Math.round(
+            learningHoursSum / 3600,
+        );
+
+        let totalJobs = 0;
+        let totalHired = 0;
+        const jobs = await Job.find({ institutionId });
+
+        for (const job of jobs) {
+            if (job.departments.includes(departmentId)) {
+                totalJobs++;
+                totalHired += job.hiredCount;
+            }
+        }
+
+        return res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.OK,
+            code: HttpStatusCode.Ok,
+            data: {
+                departmentName: department.name,
+                studentsPlacedThisYear: totalHired,
+                totalJobsPosted: totalJobs,
+                totalMontlyHoursOfInvolvement,
+                skillsBeingLearntActively: totalCount,
+                activeStudents,
+                mostAcquiredSkills: skillWithCount,
+                mostActiveStudents: top10MostActiveStudents,
+            },
+        });
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.dashboardController
+                .handleGetStaffDepartmentDashboardErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleGetAdminInstitutionDashboard = async (req, res) => {
+    try {
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const students = await User.aggregate([
+            {
+                $match: {
+                    institutionId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "educations",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "educations",
+                },
+            },
+            {
+                $lookup: {
+                    from: "workexperiences",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "workExperiences",
+                },
+            },
+            {
+                $lookup: {
+                    from: "licensecertifications",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "licenceCertifications",
+                },
+            },
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "projects",
+                },
+            },
+        ]);
+
+        const startEndDates = getStartAndEndDate(
+            new Date().toISOString().split("T")[0],
+        );
+
+        let learningHoursSum = 0;
+        let activeStudents = 0;
+        let totalRoleBasedSkills = 0;
+        let totalInterestBasedSkills = 0;
+
+        const skillCount = {};
+
+        const studentDetails = [];
+
+        for (const student of students) {
+            const dailyLearnings = await Daily_Learning.find({
+                userId: student.userId,
+                date: {
+                    $gte: startEndDates.monthStart,
+                    $lte: startEndDates.monthEnd,
+                },
+            });
+            let studentLearningHours = 0;
+            for (const dailyLearning of dailyLearnings) {
+                learningHoursSum += dailyLearning.learned;
+                studentLearningHours += dailyLearning.learned;
+            }
+            studentLearningHours = Math.round(studentLearningHours / 3600);
+            const education = student.educations.find(
+                (edu) => edu.institution === institution.name,
+            );
+            const rollNumber = education ? education.rollNumber : null;
+            const startMonthYear = education ? education.startMonthYear : null;
+            const endMonthYear = education ? education.endMonthYear : null;
+            const studentInfo = {
+                userId: student.userId,
+                username: student.username,
+                departmentId: student.departmentId,
+                rollNumber: rollNumber,
+                isActive: student.isActive,
+                studentLearningHours: studentLearningHours,
+                startMonthYear: startMonthYear,
+                endMonthYear: endMonthYear,
+            };
+            studentDetails.push(studentInfo);
+
+            if (student.isActive) {
+                activeStudents++;
+            }
+
+            for (const workExp of student.workExperiences) {
+                for (const skill of workExp.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const license of student.licenceCertifications) {
+                for (const skill of license.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const project of student.projects) {
+                for (const skill of project.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+        }
+
+        const departmentLearningHours = {};
+        const departmentActiveStudents = {};
+
+        for (const student of studentDetails) {
+            const departmentId = student.departmentId;
+            if (!departmentLearningHours[departmentId]) {
+                departmentLearningHours[departmentId] = 0;
+            }
+            departmentLearningHours[departmentId] +=
+                student.studentLearningHours;
+            if (student.isActive) {
+                if (!departmentActiveStudents[departmentId]) {
+                    departmentActiveStudents[departmentId] = 0;
+                }
+                departmentActiveStudents[departmentId]++;
+            }
+        }
+        const departments = await Department.find({ institutionId });
+        const departmentMap = {};
+        departments.forEach((department) => {
+            departmentMap[department.departmentId] = department.name;
+        });
+        const mostActiveDepartments = Object.entries(
+            departmentLearningHours,
+        ).map(([departmentId, totalLearningHours]) => ({
+            departmentId: departmentId,
+            department: departmentMap[departmentId],
+            activeStudents: departmentActiveStudents[departmentId] || 0,
+            totalLearningHours,
+        }));
+
+        mostActiveDepartments.sort(
+            (a, b) => b.totalLearningHours - a.totalLearningHours,
+        );
+
+        const top10MostActiveDepartments = mostActiveDepartments.slice(0, 10);
+
+        let totalCount = totalRoleBasedSkills + totalInterestBasedSkills;
+
+        const skillIds = Object.keys(skillCount);
+        const skillWithCount = {};
+        for (const skillId of skillIds) {
+            const skill = await Skill.findOne({ skillId: skillId });
+            const skillName = skill.skillName;
+            if (skillName) {
+                skillWithCount[skillName] = (
+                    (skillCount[skillId] / totalCount) *
+                    100
+                ).toFixed(2);
+            }
+        }
+
+        const totalMontlyHoursOfInvolvement = Math.round(
+            learningHoursSum / 3600,
+        );
+
+        let totalJobs = 0;
+        let totalHired = 0;
+        const jobs = await Job.find({ institutionId });
+
+        for (const job of jobs) {
+            totalJobs++;
+            totalHired += job.hiredCount;
+        }
+
+        return res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.OK,
+            code: HttpStatusCode.Ok,
+            data: {
+                studentsPlacedThisYear: totalHired,
+                totalJobsPosted: totalJobs,
+                totalMontlyHoursOfInvolvement,
+                skillsBeingLearntActively: totalCount,
+                activeStudents,
+                mostAcquiredSkills: skillWithCount,
+                mostActiveDepartments: top10MostActiveDepartments,
+            },
+        });
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.dashboardController
+                .handleGetAdminInstitutionDashboardErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleGetAdminDepartmentDashboard = async (req, res) => {
+    try {
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const { departmentId } = req.params;
+
+        const department = await Department.findOne({
+            institutionId,
+            departmentId,
+        });
+
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
+        const students = await User.aggregate([
+            {
+                $match: {
+                    departmentId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "educations",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "educations",
+                },
+            },
+            {
+                $lookup: {
+                    from: "workexperiences",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "workExperiences",
+                },
+            },
+            {
+                $lookup: {
+                    from: "licensecertifications",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "licenceCertifications",
+                },
+            },
+            {
+                $lookup: {
+                    from: "projects",
+                    localField: "userId",
+                    foreignField: "userId",
+                    as: "projects",
+                },
+            },
+        ]);
+
+        const startEndDates = getStartAndEndDate(
+            new Date().toISOString().split("T")[0],
+        );
+
+        let learningHoursSum = 0;
+        let activeStudents = 0;
+        let totalRoleBasedSkills = 0;
+        let totalInterestBasedSkills = 0;
+
+        const skillCount = {};
+
+        const studentDetails = [];
+
+        for (const student of students) {
+            const dailyLearnings = await Daily_Learning.find({
+                userId: student.userId,
+                date: {
+                    $gte: startEndDates.monthStart,
+                    $lte: startEndDates.monthEnd,
+                },
+            });
+            let studentLearningHours = 0;
+            for (const dailyLearning of dailyLearnings) {
+                learningHoursSum += dailyLearning.learned;
+                studentLearningHours += dailyLearning.learned;
+            }
+            studentLearningHours = Math.round(studentLearningHours / 3600);
+            const education = student.educations.find(
+                (edu) => edu.institution === institution.name,
+            );
+            const rollNumber = education ? education.rollNumber : null;
+            const startMonthYear = education ? education.startMonthYear : null;
+            const endMonthYear = education ? education.endMonthYear : null;
+            const studentInfo = {
+                userId: student.userId,
+                departmentName: department.name,
+                username: student.username,
+                rollNumber: rollNumber,
+                studentLearningHours: studentLearningHours,
+                startMonthYear: startMonthYear,
+                endMonthYear: endMonthYear,
+            };
+            studentDetails.push(studentInfo);
+
+            if (student.isActive) {
+                activeStudents++;
+            }
+
+            for (const workExp of student.workExperiences) {
+                for (const skill of workExp.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const license of student.licenceCertifications) {
+                for (const skill of license.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+
+            for (const project of student.projects) {
+                for (const skill of project.skills) {
+                    if (student.interestBasedSkills.includes(skill.skillId)) {
+                        totalInterestBasedSkills++;
+                    } else {
+                        totalRoleBasedSkills++;
+                    }
+                    if (!skillCount[skill.skillId]) {
+                        skillCount[skill.skillId] = 0;
+                    }
+                    skillCount[skill.skillId]++;
+                }
+            }
+        }
+
+        studentDetails.sort(
+            (a, b) => b.studentLearningHours - a.studentLearningHours,
+        );
+
+        const top10MostActiveStudents = studentDetails.slice(0, 10);
+
+        let totalCount = totalRoleBasedSkills + totalInterestBasedSkills;
+
+        const skillIds = Object.keys(skillCount);
+        const skillWithCount = {};
+        for (const skillId of skillIds) {
+            const skill = await Skill.findOne({ skillId: skillId });
+            const skillName = skill.skillName;
+            if (skillName) {
+                skillWithCount[skillName] = (
+                    (skillCount[skillId] / totalCount) *
+                    100
+                ).toFixed(2);
+            }
+        }
+
+        const totalMontlyHoursOfInvolvement = Math.round(
+            learningHoursSum / 3600,
+        );
+
+        let totalJobs = 0;
+        let totalHired = 0;
+        const jobs = await Job.find({ institutionId });
+
+        for (const job of jobs) {
+            if (job.departments.includes(departmentId)) {
+                totalJobs++;
+                totalHired += job.hiredCount;
+            }
+        }
+
+        return res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.OK,
+            code: HttpStatusCode.Ok,
+            data: {
+                departmentName: department.name,
+                studentsPlacedThisYear: totalHired,
+                totalJobsPosted: totalJobs,
+                totalMontlyHoursOfInvolvement,
+                skillsBeingLearntActively: totalCount,
+                activeStudents,
+                mostAcquiredSkills: skillWithCount,
+                mostActiveStudents: top10MostActiveStudents,
+            },
+        });
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.dashboardController
+                .handleGetAdminDepartmentDashboardErrorLog,
             error.message,
         );
         res.status(HttpStatusCode.InternalServerError).json({

@@ -13,6 +13,7 @@ const skillCategoryRoute = require("./skill-category.route");
 const learningsRoute = require("./learnings.route");
 
 const authstaffRoute = require("./authStaff.route");
+const dashboardRoute = require("./dashboard.route");
 const studentsRoute = require("./students.route");
 const institutionRoute = require("./institution.route");
 const placementRoute = require("./placement.route");
@@ -28,9 +29,10 @@ router.use("/learnings", verifyUser, learningsRoute);
 router.use("/skill", verifyUser, skillRoute);
 router.use("/skill-category", verifyUser, skillCategoryRoute);
 
-// router.use("/staff",)
+// Staff Routes
+router.use("/dashboard", dashboardRoute);
 router.use("/students", studentsRoute);
-router.use("/institution", institutionRoute);
 router.use("/placement", placementRoute);
+router.use("/institution", institutionRoute);
 
 module.exports = router;
