@@ -12,8 +12,8 @@ module.exports = {
             subject: "Record - Reset Password Request",
         },
         verificationOfEducation: {
-            subject: (name, course) =>
-                `Record - Verification of Education for ${name}, ${course}`,
+            subject: (username, degree, branch, institution) =>
+                `Record: Verification of education of ${username}, ${degree} in ${branch} in ${institution}`,
         },
         verificationOfWorkExperience: {
             subject: (name, role, employeeId) =>
@@ -34,6 +34,9 @@ module.exports = {
         jobNotification: {
             subject: (companyName, jobDesignation) =>
                 `Record: ${companyName} is hiring ${jobDesignation}`,
+        },
+        educationRevisionRequest: {
+            subject: "Record: Education details revision request",
         },
     },
 };

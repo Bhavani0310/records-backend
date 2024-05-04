@@ -15,6 +15,9 @@ const ErrorLogConstant = require("../../constants/error-log.constant");
 // Importing Helpers
 const generateUUID = require("../../helpers/uuid.helper");
 
+// Importing Utils
+const emailTemplates = require("../../utils/emailTemplates");
+
 // Importing Controllers
 const handleSendEmail = require("../email.controller");
 
@@ -80,8 +83,17 @@ exports.handleAddEducation = async (req, res) => {
                 subject: CommonConstant.email.verificationOfEducation.subject(
                     userProfile.username,
                     degree,
+                    branch,
+                    institution,
                 ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the education details <a href="${process.env.EMAIL_BASE_URL}/verify-education/${generatedVerificationId}">Verfiy Education</a></p>`,
+                htmlData: emailTemplates.educationVerificationRequest(
+                    "Education",
+                    userProfile.username,
+                    degree,
+                    branch,
+                    institution,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {
@@ -204,8 +216,17 @@ exports.handleUpdateEducation = async (req, res) => {
                 subject: CommonConstant.email.verificationOfEducation.subject(
                     userProfile.username,
                     degree,
+                    branch,
+                    institution,
                 ),
-                htmlData: `<p>Hello Dear Verifier, <br/>Welcome to Record<br/> Click the link to verify the education details <a href="${process.env.EMAIL_BASE_URL}/verify-education/${generatedVerificationId}">Verfiy Education</a></p>`,
+                htmlData: emailTemplates.educationVerificationRequest(
+                    "Education",
+                    userProfile.username,
+                    degree,
+                    branch,
+                    institution,
+                    "localhost:3000",
+                ),
             });
 
             if (isEmailSend) {

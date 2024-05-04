@@ -16,7 +16,7 @@ module.exports = {
     USERNAME_AVAILABLE: "Username available!",
     USER_UPDATED_SUCCESSFULLY: "User updated successfully!",
 
-    // User messages
+    // Staff messages
     STAFF_ID_REQUIRED: "Staff Id is required!",
     STAFF_NOT_FOUND: "Staff Not Found!",
     STAFF_ALREADY_EXISTS: "Staff already exist!",
@@ -72,6 +72,8 @@ module.exports = {
     // Email messages
     VERIFICATION_EMAIL_SENT_SUCCESSFULLY:
         "Verification email sent successfully!",
+    REVISION_EMAIL_SENT_SUCCESSFULLY: "Revision email sent successfully!",
+    REVISION_EMAIL_SENT_FAILED: "Revision email sent failed!",
     VERIFICATION_EMAIL_SENT_FAILED: "Verification email sent failed!",
     EMAIL_ALREADY_VERIFIED: "Email already verified!",
     EMAIL_VERIFIED_SUCCESSFULLY: "Email verified successfully!",
@@ -115,6 +117,12 @@ module.exports = {
     SKILL_CATEGORY_ID_REQUIRED: "Skill category id is required!",
     SKILL_CATEGORY_UPDATED_SUCCESSFULLY: "Skill category updated successfully!",
     INVALID_SKILLS: "Invalid Skills!",
+
+    //Profile Verification Messages
+    VERIFICATION_DETAILS_NOT_FOUND: "Verification details not found!",
+    VERIFICATION_DONE_SUCCESSFULLY: "Verification done successfully",
+    VERIFICATION_ALREADY_DONE: "Verification already done",
+    COMMENT_ADDED_SUCCESSFULLY: "Comment added successfully",
 
     // Profile Messages
     PROFILE_UPDATED_SUCCESSFULLY: "Profile updated successfully!",

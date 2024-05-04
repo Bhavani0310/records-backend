@@ -13,6 +13,8 @@ const skillCategoryRoute = require("./skill-category.route");
 const learningsRoute = require("./learnings.route");
 
 const authstaffRoute = require("./authStaff.route");
+const revisionRoute = require("./revision.route");
+const verificationRoute = require("./verification.route");
 const dashboardRoute = require("./dashboard.route");
 const studentsRoute = require("./students.route");
 const institutionRoute = require("./institution.route");
@@ -30,6 +32,8 @@ router.use("/skill", verifyUser, skillRoute);
 router.use("/skill-category", verifyUser, skillCategoryRoute);
 
 // Staff Routes
+router.use("/revision", revisionRoute);
+router.use("/verify", verificationRoute);
 router.use("/dashboard", dashboardRoute);
 router.use("/students", studentsRoute);
 router.use("/placement", placementRoute);

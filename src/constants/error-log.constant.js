@@ -167,4 +167,14 @@ module.exports = {
         handleGetStudentDepartmentPageStaffErrorLog:
             "🚀 ~ file: students.controller.js ~ handleGetStudentDepartmentPageStaff ~ err",
     },
+    revisionController: {
+        handleEducationRevisionErrorLog:
+            "🚀 ~ file: revision.controller.js ~ handleEducationRevision ~ err",
+    },
+    verificationController: {
+        handleGetVerifyEducationDetailsErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleGetVerifyEducationDetails ~ err",
+        handleVerifyEducationErrorLog:
+            "🚀 ~ file: verification.controller.js ~ handleVerifyEducation ~ err",
+    },
 };
