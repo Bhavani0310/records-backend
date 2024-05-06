@@ -208,6 +208,10 @@ module.exports = {
             "🚀 ~ file: superadmin.controller.js ~ handleSuperAdminLogin ~ err",
         handleSuperAdminLogoutErrorLog:
             "🚀 ~ file: superadmin.controller.js ~ handleSuperAdminLogout ~ err",
+        handleSuperAdminForgotPasswordErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleSuperAdminForgotPassword ~ err",
+        handleSuperAdminResetPasswordErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleSuperAdminResetPassword ~ err",
         handleAddAdministrativeDepartmentErrorLog:
             "🚀 ~ file: superadmin.controller.js ~ handleAddAdministrativeDepartment ~ err",
         handleAddAdminForInstitutionErrorLog:

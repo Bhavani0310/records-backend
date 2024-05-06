@@ -24,6 +24,9 @@ const getRecordSignature = require("../helpers/cookie.helper");
 // Importing Controllers
 const handleSendEmail = require("./email.controller");
 
+// Importing Utils
+const emailTemplates = require("../utils/emailTemplates");
+
 exports.handleAddSuperAdmin = async (req, res) => {
     try {
         const { fullName, mobile, email } = req.body;
@@ -183,6 +186,169 @@ exports.handleSuperAdminLogout = async (req, res) => {
             error.message,
         );
         res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleSuperAdminForgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const userValidation = Joi.object({
+            email: Joi.string().email().required(),
+        });
+
+        const { error } = userValidation.validate(req.body);
+
+        if (error) {
+            return res.status(HttpStatusCode.BadRequest).json({
+                status: HttpStatusConstant.BAD_REQUEST,
+                code: HttpStatusCode.BadRequest,
+                message: error.details[0].message.replace(/"/g, ""),
+            });
+        }
+
+        const superAdmin = await SuperAdmin.findOne({
+            email,
+        });
+
+        if (!superAdmin) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.SUPER_ADMIN_NOT_FOUND,
+            });
+        }
+
+        const superAdminId = superAdmin.superAdminId;
+
+        const checkIsPasswordResetTokenExists =
+            await PasswordResetToken.findOne({
+                userId: superAdminId,
+            });
+
+        let passwordResetAccessTokenId;
+
+        if (checkIsPasswordResetTokenExists) {
+            passwordResetAccessTokenId =
+                checkIsPasswordResetTokenExists.passwordResetTokenId;
+        } else {
+            const passwordResetTokenResponse = await PasswordResetToken.create({
+                passwordResetTokenId: generateUUID(),
+                userId: superAdminId,
+            });
+            passwordResetAccessTokenId =
+                passwordResetTokenResponse.passwordResetTokenId;
+        }
+
+        const isEmailSend = await handleSendEmail({
+            toAddresses: [email],
+            source: CommonConstant.email.source.tech_team,
+            subject: CommonConstant.email.resetPasswordEmail.subject,
+            htmlData: emailTemplates.forgotPasswordSuperAdmin(
+                passwordResetAccessTokenId,
+            ),
+        });
+
+        if (isEmailSend) {
+            return res.status(HttpStatusCode.Ok).json({
+                status: HttpStatusConstant.OK,
+                code: HttpStatusCode.Ok,
+                message:
+                    ResponseMessageConstant.PASSWORD_RESET_EMAIL_SENT_SUCCESSFULLY,
+            });
+        } else {
+            return res.status(HttpStatusCode.InternalServerError).json({
+                status: HttpStatusConstant.ERROR,
+                code: HttpStatusCode.InternalServerError,
+                message:
+                    ResponseMessageConstant.PASSWORD_RESET_EMAIL_SENT_FAILED,
+            });
+        }
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.superadminController
+                .handleSuperAdminForgotPasswordErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleSuperAdminResetPassword = async (req, res) => {
+    try {
+        const { password_reset_token } = req.params;
+
+        const userValidation = Joi.object({
+            password_reset_token: Joi.string().required(),
+        });
+
+        const { error } = userValidation.validate(req.params);
+
+        if (error) {
+            return res.status(HttpStatusCode.BadRequest).json({
+                status: HttpStatusConstant.BAD_REQUEST,
+                code: HttpStatusCode.BadRequest,
+                message: error.details[0].message.replace(/"/g, ""),
+            });
+        }
+
+        const checkIsPasswordResetTokenExists =
+            await PasswordResetToken.findOne({
+                passwordResetTokenId: password_reset_token,
+            });
+
+        if (!checkIsPasswordResetTokenExists) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.PASSWORD_RESET_TOKEN_NOT_FOUND,
+            });
+        } else {
+            const { userId } = checkIsPasswordResetTokenExists;
+
+            const superAdmin = await SuperAdmin.findOne({
+                superAdminId: userId,
+            });
+
+            if (!superAdmin) {
+                return res.status(HttpStatusCode.NotFound).json({
+                    status: HttpStatusConstant.NOT_FOUND,
+                    code: HttpStatusCode.NotFound,
+                    message: ResponseMessageConstant.SUPER_ADMIN_NOT_FOUND,
+                });
+            } else {
+                const { password } = req.body;
+
+                const encryptedPassword = await bcrypt.hash(password, 10);
+                superAdmin.password = encryptedPassword;
+
+                await superAdmin.save();
+
+                await PasswordResetToken.findOneAndDelete({
+                    passwordResetTokenId: password_reset_token,
+                });
+
+                res.status(HttpStatusCode.Ok).json({
+                    status: HttpStatusConstant.OK,
+                    code: HttpStatusCode.Ok,
+                    message:
+                        ResponseMessageConstant.PASSWORD_CHANGED_SUCCESSFULLY,
+                });
+            }
+        }
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.superadminController
+                .handleSuperAdminResetPasswordErrorLog,
+            error.message,
+        );
+        return res.status(HttpStatusCode.InternalServerError).json({
             status: HttpStatusConstant.ERROR,
             code: HttpStatusCode.InternalServerError,
         });

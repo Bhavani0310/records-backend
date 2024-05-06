@@ -16,6 +16,15 @@ router.post(
     superadminController.handleSuperAdminLogout,
 );
 
+router.post(
+    "/forgot-password",
+    superadminController.handleSuperAdminForgotPassword,
+);
+router.post(
+    "/change-password/:password_reset_token",
+    superadminController.handleSuperAdminResetPassword,
+);
+
 // Add Institution
 router.post(
     "/institution",
