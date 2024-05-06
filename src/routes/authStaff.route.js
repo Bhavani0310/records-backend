@@ -9,7 +9,6 @@ const verifyStaff = require("../middlewares/staff.mw");
 const verifyRole = require("../middlewares/verifyRole.mw");
 
 // Manual Auth Routes
-router.post("/register", authStaffController.handleRegister);
 router.post("/login", authStaffController.handleLogin);
 router.post("/logout", verifyStaff, authStaffController.handleLogout);
 

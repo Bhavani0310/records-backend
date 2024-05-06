@@ -22,6 +22,8 @@ const studentsRoute = require("./students.route");
 const institutionRoute = require("./institution.route");
 const placementRoute = require("./placement.route");
 
+const superadminRoute = require("./superadmin.route");
+
 // Non authorization routes
 router.use("/auth", authRoute);
 router.use("/authstaff", authstaffRoute);
@@ -50,5 +52,7 @@ router.use("/dashboard", dashboardRoute);
 router.use("/students", studentsRoute);
 router.use("/placement", placementRoute);
 router.use("/institution", institutionRoute);
+
+router.use("/superadmin", superadminRoute);
 
 module.exports = router;

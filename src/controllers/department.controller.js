@@ -35,7 +35,10 @@ exports.handleAddDepartment = async (req, res) => {
 
         const { name, programType, programDuration } = req.body;
 
-        const checkDepartmentExists = await Department.findOne({ name });
+        const checkDepartmentExists = await Department.findOne({
+            institutionId,
+            name,
+        });
 
         if (checkDepartmentExists) {
             return res.status(HttpStatusCode.Conflict).json({

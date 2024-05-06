@@ -6,7 +6,7 @@ const staffSchema = new mongoose.Schema({
         unique: true,
     },
     institutionId: { type: String, required: true },
-    departmentId: { type: String, required: false },
+    departmentId: { type: String, required: true },
     role: {
         type: String,
         enum: ["Administrator", "Staff"],

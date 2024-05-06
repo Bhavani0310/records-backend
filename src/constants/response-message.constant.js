@@ -22,6 +22,9 @@ module.exports = {
     STAFF_ALREADY_EXISTS: "Staff already exist!",
     STAFF_UPDATED_SUCCESSFULLY: "Staff updated successfully!",
 
+    SUPER_ADMIN_ALREADY_EXISTS: "Super Admin already exist!",
+    SUPER_ADMIN_NOT_FOUND: "Super Admin not found!",
+
     // Instituion messages
     INSTITUTION_ALREADY_EXISTS: "Institution already exist!",
     INSTITUTION_NOT_FOUND: "Institution Not Found!",

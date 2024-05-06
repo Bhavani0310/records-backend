@@ -201,4 +201,16 @@ module.exports = {
         handleVerifyActivityErrorLog:
             "🚀 ~ file: verification.controller.js ~ handleVerifyActivity ~ err",
     },
+    superadminController: {
+        handleAddSuperAdminErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleAddSuperAdmin ~ err",
+        handleSuperAdminLoginErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleSuperAdminLogin ~ err",
+        handleSuperAdminLogoutErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleSuperAdminLogout ~ err",
+        handleAddAdministrativeDepartmentErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleAddAdministrativeDepartment ~ err",
+        handleAddAdminForInstitutionErrorLog:
+            "🚀 ~ file: superadmin.controller.js ~ handleAddAdminForInstitution ~ err",
+    },
 };

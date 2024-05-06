@@ -9,10 +9,6 @@ const departmentController = require("../controllers/department.controller");
 const verifyStaff = require("../middlewares/staff.mw");
 const verifyRole = require("../middlewares/verifyRole.mw");
 
-// Check if only admin
-
-router.post("/", institutionController.handleAddInstitution);
-
 router.get(
     "/profile",
     verifyStaff,

@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 // Importing Models
 const Staff = require("../models/staff.model");
 const jwtToken = require("../models/jwt-token.model");
-const verificationToken = require("../models/verification-token.model");
 const PasswordResetToken = require("../models/password-reset-token.model");
 const Institution = require("../models/institution.model");
 const Department = require("../models/department.model");
@@ -23,86 +22,6 @@ const getRecordSignature = require("../helpers/cookie.helper");
 
 // Importing Controllers
 const handleSendEmail = require("./email.controller");
-
-exports.handleRegister = async (req, res) => {
-    try {
-        const {
-            institutionId,
-            fullName,
-            designation,
-            mobile,
-            email,
-            password,
-        } = req.body;
-
-        const userValidation = Joi.object({
-            institutionId: Joi.string().required(),
-            fullName: Joi.string().required(),
-            designation: Joi.string().required(),
-            mobile: Joi.string().required(),
-            email: Joi.string().email().required(),
-            password: Joi.string().required(),
-        });
-
-        const { error } = userValidation.validate(req.body);
-
-        if (error) {
-            return res.status(HttpStatusCode.BadRequest).json({
-                status: HttpStatusConstant.BAD_REQUEST,
-                code: HttpStatusCode.BadRequest,
-                message: error.details[0].message.replace(/"/g, ""),
-            });
-        }
-
-        const institution = await Institution.findOne({ institutionId });
-
-        if (!institution) {
-            return res.status(HttpStatusCode.NotFound).json({
-                status: HttpStatusConstant.NOT_FOUND,
-                code: HttpStatusCode.NotFound,
-                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
-            });
-        }
-
-        const staffExists = await Staff.findOne({ email });
-
-        if (staffExists) {
-            res.status(HttpStatusCode.Conflict).json({
-                status: HttpStatusConstant.CONFLICT,
-                code: HttpStatusCode.Conflict,
-                message: ResponseMessageConstant.STAFF_ALREADY_EXISTS,
-            });
-        } else {
-            const encryptedPassword = await bcrypt.hash(password, 10);
-            const generatedStaffId = generateUUID();
-
-            await Staff.create({
-                staffId: generatedStaffId,
-                institutionId,
-                role: "admin",
-                fullName,
-                designation,
-                mobile,
-                email,
-                password: encryptedPassword,
-            });
-
-            res.status(HttpStatusCode.Created).json({
-                status: HttpStatusConstant.CREATED,
-                code: HttpStatusCode.Created,
-            });
-        }
-    } catch (error) {
-        console.log(
-            ErrorLogConstant.authStaffController.handleRegisterErrorLog,
-            error.message,
-        );
-        res.status(HttpStatusCode.InternalServerError).json({
-            status: HttpStatusConstant.ERROR,
-            code: HttpStatusCode.InternalServerError,
-        });
-    }
-};
 
 exports.handleAddStaff = async (req, res) => {
     try {
@@ -141,7 +60,11 @@ exports.handleAddStaff = async (req, res) => {
             });
         }
 
-        const staffExists = await Staff.findOne({ email });
+        const staffExists = await Staff.findOne({
+            institutionId,
+            departmentId,
+            email,
+        });
 
         if (staffExists) {
             res.status(HttpStatusCode.Conflict).json({
@@ -150,7 +73,7 @@ exports.handleAddStaff = async (req, res) => {
                 message: ResponseMessageConstant.STAFF_ALREADY_EXISTS,
             });
         } else {
-            const password = "admin123";
+            const password = "staff123";
             const encryptedPassword = await bcrypt.hash(password, 10);
             const generatedStaffId = generateUUID();
 
@@ -272,7 +195,7 @@ exports.handleLogin = async (req, res) => {
                     CommonConstant.signatureCookieName,
                     generatedAccessToken,
                     {
-                        maxAge: 3600000,
+                        maxAge: 86400000,
                         httpOnly: false,
                         secure: true,
                         sameSite: "none",

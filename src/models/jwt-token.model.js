@@ -13,7 +13,7 @@ const jwt_tokenSchema = new mongoose.Schema(
         createdAt: {
             type: Date,
             default: Date.now,
-            expires: 3600,
+            expires: 24 * 60 * 60,
         },
     },
     { timestamps: true },
