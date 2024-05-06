@@ -23,6 +23,9 @@ const getRecordSignature = require("../helpers/cookie.helper");
 // Importing Controllers
 const handleSendEmail = require("./email.controller");
 
+// Importing Utils
+const emailTemplates = require("../utils/emailTemplates");
+
 exports.handleAddStaff = async (req, res) => {
     try {
         const { departmentId, fullName, email, role } = req.body;
@@ -60,6 +63,18 @@ exports.handleAddStaff = async (req, res) => {
             });
         }
 
+        const department = await Department.findOne({
+            institutionId,
+            departmentId,
+        });
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
         const staffExists = await Staff.findOne({
             institutionId,
             departmentId,
@@ -76,18 +91,6 @@ exports.handleAddStaff = async (req, res) => {
             const password = "staff123";
             const encryptedPassword = await bcrypt.hash(password, 10);
             const generatedStaffId = generateUUID();
-
-            const department = await Department.findOne({
-                institutionId,
-                departmentId,
-            });
-            if (!department) {
-                return res.status(HttpStatusCode.NotFound).json({
-                    status: HttpStatusConstant.NOT_FOUND,
-                    code: HttpStatusCode.NotFound,
-                    message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
-                });
-            }
 
             const departmentName = department.name;
 
@@ -360,11 +363,13 @@ exports.handleSendResetPassMail = async (req, res) => {
                 passwordResetTokenResponse.passwordResetTokenId;
         }
 
+        const link = `${process.env.STAFF_WEBSITE}/reset-password/${passwordResetAccessTokenId}`;
+
         const isEmailSend = await handleSendEmail({
             toAddresses: [email],
             source: CommonConstant.email.source.tech_team,
             subject: CommonConstant.email.resetPasswordEmail.subject,
-            htmlData: `<p>Hello User <br/>Welcome to Record<br/> Your password reset link <a href="${process.env.EMAIL_BASE_URL}/reset-password/${passwordResetAccessTokenId}">Reset Password</a></p>`,
+            htmlData: emailTemplates.forgotPassword(link),
         });
 
         if (isEmailSend) {
@@ -384,7 +389,8 @@ exports.handleSendResetPassMail = async (req, res) => {
         }
     } catch (error) {
         console.log(
-            ErrorLogConstant.userController.handleResetPassEmailErrorLog,
+            ErrorLogConstant.authStaffController
+                .handleSendResetPassMailErrorLog,
             error.message,
         );
         return res.status(HttpStatusCode.InternalServerError).json({
@@ -458,7 +464,7 @@ exports.handleResetPass = async (req, res) => {
         }
     } catch (error) {
         console.log(
-            ErrorLogConstant.userController.handleResetPassEmailErrorLog,
+            ErrorLogConstant.authStaffController.handleResetPassErrorLog,
             error.message,
         );
         return res.status(HttpStatusCode.InternalServerError).json({

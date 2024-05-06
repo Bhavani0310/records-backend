@@ -21,7 +21,7 @@ router.post(
     superadminController.handleSuperAdminForgotPassword,
 );
 router.post(
-    "/change-password/:password_reset_token",
+    "/reset-password/:password_reset_token",
     superadminController.handleSuperAdminResetPassword,
 );
 

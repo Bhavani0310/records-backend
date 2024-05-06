@@ -14,20 +14,18 @@ module.exports = {
             "🚀 ~ file: auth.controller.js ~ handleSendVerificationEmail ~ err",
     },
     authStaffController: {
-        handleRegisterErrorLog:
-            "🚀 ~ file: authStaff.controller.js ~ handleRegister ~ err",
         handleAddStaffErrorLog:
             "🚀 ~ file: authStaff.controller.js ~ handleAddStaff ~ err",
         handleLoginErrorLog:
             "🚀 ~ file: authStaff.controller.js ~ handleLogin ~ err",
         handleVerifySessionErrorLog:
             "🚀 ~ file: authStaff.controller.js ~ handleVerifiySession ~ err",
-        handleGoogleLoginErrorLog:
-            "🚀 ~ file: authStaff.controller.js ~ handleGoogleLogin ~ err",
         handleLogoutErrorLog:
             "🚀 ~ file: authStaff.controller.js ~ handleLogout ~ err",
-        handleResetPassEmailErrorLog:
-            "🚀 ~ file: authStaff.controller.js ~ handleSendVerificationEmail ~ err",
+        handleSendResetPassMailErrorLog:
+            "🚀 ~ file: authStaff.controller.js ~ handleSendResetPassMail ~ err",
+        handleResetPassErrorLog:
+            "🚀 ~ file: authStaff.controller.js ~ handleResetPass ~ err",
     },
     emailController: {
         handleSendEmailErrorLog:

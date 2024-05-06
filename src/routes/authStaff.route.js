@@ -12,6 +12,7 @@ const verifyRole = require("../middlewares/verifyRole.mw");
 router.post("/login", authStaffController.handleLogin);
 router.post("/logout", verifyStaff, authStaffController.handleLogout);
 
+// Staff Routes
 router.post(
     "/addStaff",
     verifyStaff,
@@ -22,7 +23,7 @@ router.post(
 // reset password routes
 router.post("/forgot-password", authStaffController.handleSendResetPassMail);
 router.post(
-    "/change-password/:password_reset_token",
+    "/reset-password/:password_reset_token",
     authStaffController.handleResetPass,
 );
 

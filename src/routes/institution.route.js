@@ -38,7 +38,7 @@ router.put(
 );
 
 router.get(
-    "/department",
+    "/departments",
     verifyStaff,
     verifyRole(["Administrator"]),
     departmentController.handleGetAllDepartment,
