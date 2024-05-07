@@ -14,14 +14,14 @@ router.post("/logout", verifyStaff, authStaffController.handleLogout);
 
 // Staff Routes
 router.post(
-    "/staff",
+    "/register",
     verifyStaff,
     verifyRole(["Administrator"]),
     authStaffController.handleAddStaff,
 );
 
 router.put(
-    "/staff/:staffId",
+    "/:staffId",
     verifyStaff,
     verifyRole(["Administrator"]),
     authStaffController.handleUpdateStaff,

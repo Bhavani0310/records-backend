@@ -26,7 +26,7 @@ const superadminRoute = require("./superadmin.route");
 
 // Non authorization routes
 router.use("/auth", authRoute);
-router.use("/authstaff", authstaffRoute);
+router.use("/auth/staff", authstaffRoute);
 
 // Authorization routes
 router.use("/user", verifyUser, userRoute);
