@@ -16,6 +16,8 @@ module.exports = {
     authStaffController: {
         handleAddStaffErrorLog:
             "🚀 ~ file: authStaff.controller.js ~ handleAddStaff ~ err",
+        handleUpdateStaffErrorLog:
+            "🚀 ~ file: authStaff.controller.js ~ handleUpdateStaff ~ err",
         handleLoginErrorLog:
             "🚀 ~ file: authStaff.controller.js ~ handleLogin ~ err",
         handleVerifySessionErrorLog:

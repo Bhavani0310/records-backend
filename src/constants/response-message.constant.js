@@ -6,6 +6,7 @@ module.exports = {
     INVALID_CREDENTIALS: "Invalid Credentials!",
     INCORRECT_AUTHENTICATION: "Incorrect authentication!",
     INSUFFICIENT_ROLE: "Forbidden: Insufficient role!",
+    ROLE_DOWNGRADE_NOT_ALLOWED: "Role downgrade not allowed!",
 
     // User messages
     USER_ID_REQUIRED: "User Id is required!",

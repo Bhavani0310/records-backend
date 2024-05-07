@@ -152,6 +152,129 @@ exports.handleAddStaff = async (req, res) => {
     }
 };
 
+exports.handleUpdateStaff = async (req, res) => {
+    try {
+        const { staffId: sessionStaffId } = req.staffSession;
+
+        const admin = await Staff.findOne({ staffId: sessionStaffId });
+
+        const institutionId = admin.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const { departmentId, fullName, email, role } = req.body;
+
+        const userValidation = Joi.object({
+            departmentId: Joi.string().required(),
+            fullName: Joi.string().required(),
+            email: Joi.string().email().required(),
+            role: Joi.string().required(),
+        });
+
+        const { error } = userValidation.validate(req.body);
+
+        if (error) {
+            return res.status(HttpStatusCode.BadRequest).json({
+                status: HttpStatusConstant.BAD_REQUEST,
+                code: HttpStatusCode.BadRequest,
+                message: error.details[0].message.replace(/"/g, ""),
+            });
+        }
+
+        const department = await Department.findOne({
+            institutionId,
+            departmentId,
+        });
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
+        const { staffId } = req.params;
+        const staff = await Staff.findOne({
+            staffId,
+            institutionId,
+        });
+
+        if (!staff) {
+            res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.STAFF_NOT_FOUND,
+            });
+        } else {
+            const departmentName = department.name;
+
+            if (departmentName === "Administrative") {
+                if (role === "Administrator") {
+                    staff.departmentId = departmentId;
+                    staff.fullName = fullName;
+                    staff.email = email;
+                    staff.role = role;
+                    await staff.save();
+                } else {
+                    return res.status(HttpStatusCode.BadRequest).json({
+                        status: HttpStatusConstant.BAD_REQUEST,
+                        code: HttpStatusCode.BadRequest,
+                        message:
+                            ResponseMessageConstant.INVALID_ROLE_FOR_DEPARTMENT,
+                    });
+                }
+            } else {
+                if (role === "Administrator") {
+                    return res.status(HttpStatusCode.BadRequest).json({
+                        status: HttpStatusConstant.BAD_REQUEST,
+                        code: HttpStatusCode.BadRequest,
+                        message:
+                            ResponseMessageConstant.INVALID_ROLE_FOR_DEPARTMENT,
+                    });
+                } else {
+                    if (staff.role === "Administrator" && role === "Staff") {
+                        return res.status(HttpStatusCode.Forbidden).json({
+                            status: HttpStatusConstant.FORBIDDEN,
+                            code: HttpStatusCode.Forbidden,
+                            message:
+                                ResponseMessageConstant.ROLE_DOWNGRADE_NOT_ALLOWED,
+                        });
+                    } else {
+                        staff.departmentId = departmentId;
+                        staff.fullName = fullName;
+                        staff.email = email;
+                        staff.role = role;
+                        await staff.save();
+                    }
+                }
+            }
+
+            res.status(HttpStatusCode.Created).json({
+                status: HttpStatusConstant.CREATED,
+                code: HttpStatusCode.Created,
+                message: ResponseMessageConstant.STAFF_UPDATED_SUCCESSFULLY,
+            });
+        }
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.authStaffController.handleUpdateStaffErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
 exports.handleLogin = async (req, res) => {
     try {
         const { email, password } = req.body;

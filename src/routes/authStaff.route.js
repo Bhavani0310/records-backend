@@ -14,10 +14,17 @@ router.post("/logout", verifyStaff, authStaffController.handleLogout);
 
 // Staff Routes
 router.post(
-    "/addStaff",
+    "/staff",
     verifyStaff,
     verifyRole(["Administrator"]),
     authStaffController.handleAddStaff,
+);
+
+router.put(
+    "/staff/:staffId",
+    verifyStaff,
+    verifyRole(["Administrator"]),
+    authStaffController.handleUpdateStaff,
 );
 
 // reset password routes
