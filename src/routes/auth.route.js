@@ -25,7 +25,7 @@ router.post(
 // reset password routes
 router.post("/forgot-password", authController.handleSendResetPassMail);
 router.post(
-    "/change-password/:password_reset_token",
+    "/reset-password/:password_reset_token",
     authController.handleResetPass,
 );
 

@@ -24,6 +24,9 @@ const getRecordSignature = require("../helpers/cookie.helper");
 // Importing Controllers
 const handleSendEmail = require("./email.controller");
 
+// Importing Utils
+const emailTemplates = require("../utils/emailTemplates");
+
 exports.handleLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -419,11 +422,13 @@ exports.handleSendResetPassMail = async (req, res) => {
                 passwordResetTokenResponse.passwordResetTokenId;
         }
 
+        const link = `${process.env.STUDENT_WEBSITE}/reset-password/${passwordResetAccessTokenId}`;
+
         const isEmailSend = await handleSendEmail({
             toAddresses: [email],
             source: CommonConstant.email.source.tech_team,
             subject: CommonConstant.email.resetPasswordEmail.subject,
-            htmlData: `<p>Hello User <br/>Welcome to Record<br/> Your password reset link <a href="${process.env.EMAIL_BASE_URL}/reset-password/${passwordResetAccessTokenId}">Reset Password</a></p>`,
+            htmlData: emailTemplates.forgotPassword(link),
         });
 
         if (isEmailSend) {

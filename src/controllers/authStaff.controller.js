@@ -2,6 +2,7 @@ const Joi = require("joi");
 const bcrypt = require("bcryptjs");
 
 // Importing Models
+const User = require("../models/user.model");
 const Staff = require("../models/staff.model");
 const jwtToken = require("../models/jwt-token.model");
 const PasswordResetToken = require("../models/password-reset-token.model");
@@ -519,7 +520,7 @@ exports.handleVerifiySession = async (req, res) => {
             res.status(HttpStatusCode.Ok).json({
                 status: HttpStatusConstant.OK,
                 code: HttpStatusCode.Ok,
-                data: user,
+                data: staff,
             });
         }
     } catch (error) {
