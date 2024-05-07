@@ -70,7 +70,7 @@ exports.handleEducationRevision = async (req, res) => {
             subject: CommonConstant.email.educationRevisionRequest.subject,
             htmlData: emailTemplates.educationRevisionRequest(
                 "Education",
-                user.username,
+                user.fullName,
                 comment,
                 "localhost:3000",
             ),
@@ -218,7 +218,7 @@ exports.handleWorkExperienceRevision = async (req, res) => {
             subject: CommonConstant.email.workExperienceRevisionRequest.subject,
             htmlData: emailTemplates.workExperienceRevisionRequest(
                 "Experience",
-                user.username,
+                user.fullName,
                 comment,
                 endorsedSkillNames,
                 "localhost:3000",
@@ -373,7 +373,7 @@ exports.handleLicenseCertificationRevision = async (req, res) => {
                     .subject,
             htmlData: emailTemplates.workExperienceRevisionRequest(
                 "License & Certification",
-                user.username,
+                user.fullName,
                 comment,
                 endorsedSkillNames,
                 "localhost:3000",
@@ -523,7 +523,7 @@ exports.handleProjectRevision = async (req, res) => {
             subject: CommonConstant.email.projectRevisionRequest.subject,
             htmlData: emailTemplates.workExperienceRevisionRequest(
                 "Project",
-                user.username,
+                user.fullName,
                 comment,
                 endorsedSkillNames,
                 "localhost:3000",
@@ -603,7 +603,7 @@ exports.handleActivityRevision = async (req, res) => {
             subject: CommonConstant.email.activityRevisionRequest.subject,
             htmlData: emailTemplates.educationRevisionRequest(
                 "Activity",
-                user.username,
+                user.fullName,
                 comment,
                 "localhost:3000",
             ),

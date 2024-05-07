@@ -322,7 +322,7 @@ exports.handleCreateJob = async (req, res) => {
                             jobDesignation,
                         ),
                         htmlData: emailTemplates.jobOpportunity(
-                            student.username,
+                            student.fullName,
                             postedJob,
                             otherJobOpportunities[student.departmentId],
                         ),

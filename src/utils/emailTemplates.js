@@ -249,7 +249,7 @@ const generateOtherJobsHTML = (otherJobs) => {
     return otherJobsHTML;
 };
 
-exports.jobOpportunity = (username, postedJob, otherJobs) => {
+exports.jobOpportunity = (fullName, postedJob, otherJobs) => {
     const postedJobHTML = `
         <div>
             <p><strong>${postedJob.jobDesignation}</strong><br>
@@ -273,7 +273,7 @@ exports.jobOpportunity = (username, postedJob, otherJobs) => {
             <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc;">
                 <h2 style="text-align: center;">New Placement Opportunity Alert</h2>
                 <hr>
-                <p>Dear ${username},</p>
+                <p>Dear ${fullName},</p>
                 <p>Your College is Recommending to apply to this opportunity:</p>
                 ${postedJobHTML}
                 <hr>

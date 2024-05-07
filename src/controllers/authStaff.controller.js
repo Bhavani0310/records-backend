@@ -275,6 +275,105 @@ exports.handleUpdateStaff = async (req, res) => {
     }
 };
 
+exports.handleAddStudent = async (req, res) => {
+    try {
+        const { email, fullName, rollNumber, courseStartYear, courseEndYear } =
+            req.body;
+
+        const userValidation = Joi.object({
+            email: Joi.string().email().required(),
+            fullName: Joi.string().required(),
+            rollNumber: Joi.string().required(),
+            courseStartYear: Joi.string().required(),
+            courseEndYear: Joi.string().required(),
+        });
+
+        const { error } = userValidation.validate(req.body);
+
+        if (error) {
+            return res.status(HttpStatusCode.BadRequest).json({
+                status: HttpStatusConstant.BAD_REQUEST,
+                code: HttpStatusCode.BadRequest,
+                message: error.details[0].message.replace(/"/g, ""),
+            });
+        }
+
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        if (!staff) {
+            res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.STAFF_NOT_FOUND,
+            });
+        }
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({ institutionId });
+
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const departmentId = staff.departmentId;
+
+        const department = await Department.findOne({ departmentId });
+
+        if (!department) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.DEPARTMENT_NOT_FOUND,
+            });
+        }
+
+        const userExists = await User.findOne({ email }).select("email -_id");
+
+        if (userExists) {
+            res.status(HttpStatusCode.Conflict).json({
+                status: HttpStatusConstant.CONFLICT,
+                code: HttpStatusCode.Conflict,
+                message: ResponseMessageConstant.USER_ALREADY_EXISTS,
+            });
+        } else {
+            const password = "student123";
+            const encryptedPassword = await bcrypt.hash(password, 10);
+            const generatedUserId = generateUUID();
+            await User.create({
+                userId: generatedUserId,
+                institutionId,
+                departmentId,
+                email,
+                password: encryptedPassword,
+                fullName,
+                rollNumber,
+                courseStartYear,
+                courseEndYear,
+            });
+            res.status(HttpStatusCode.Created).json({
+                status: HttpStatusConstant.CREATED,
+                code: HttpStatusCode.Created,
+            });
+        }
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.authStaffController.handleAddStudentErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
 exports.handleLogin = async (req, res) => {
     try {
         const { email, password } = req.body;

@@ -566,20 +566,17 @@ exports.handleGetStaffDepartmentDashboard = async (req, res) => {
                 studentLearningHours += dailyLearning.learned;
             }
             studentLearningHours = Math.round(studentLearningHours / 3600);
-            const education = student.educations.find(
-                (edu) => edu.institution === institution.name,
-            );
-            const rollNumber = education ? education.rollNumber : null;
-            const startMonthYear = education ? education.startMonthYear : null;
-            const endMonthYear = education ? education.endMonthYear : null;
+            const rollNumber = student.rollNumber;
+            const courseStartYear = student.courseStartYear;
+            const courseEndYear = student.courseEndYear;
             const studentInfo = {
                 userId: student.userId,
                 departmentName: department.name,
-                username: student.username,
+                fullName: student.fullName,
                 rollNumber: rollNumber,
                 studentLearningHours: studentLearningHours,
-                startMonthYear: startMonthYear,
-                endMonthYear: endMonthYear,
+                courseStartYear: courseStartYear,
+                courseEndYear: courseEndYear,
             };
             studentDetails.push(studentInfo);
 
@@ -778,21 +775,18 @@ exports.handleGetAdminInstitutionDashboard = async (req, res) => {
                 studentLearningHours += dailyLearning.learned;
             }
             studentLearningHours = Math.round(studentLearningHours / 3600);
-            const education = student.educations.find(
-                (edu) => edu.institution === institution.name,
-            );
-            const rollNumber = education ? education.rollNumber : null;
-            const startMonthYear = education ? education.startMonthYear : null;
-            const endMonthYear = education ? education.endMonthYear : null;
+            const rollNumber = student.rollNumber;
+            const courseStartYear = student.courseStartYear;
+            const courseEndYear = student.courseEndYear;
             const studentInfo = {
                 userId: student.userId,
-                username: student.username,
+                fullName: student.fullName,
                 departmentId: student.departmentId,
                 rollNumber: rollNumber,
                 isActive: student.isActive,
                 studentLearningHours: studentLearningHours,
-                startMonthYear: startMonthYear,
-                endMonthYear: endMonthYear,
+                courseStartYear: courseStartYear,
+                courseEndYear: courseEndYear,
             };
             studentDetails.push(studentInfo);
 
@@ -1034,20 +1028,17 @@ exports.handleGetAdminDepartmentDashboard = async (req, res) => {
                 studentLearningHours += dailyLearning.learned;
             }
             studentLearningHours = Math.round(studentLearningHours / 3600);
-            const education = student.educations.find(
-                (edu) => edu.institution === institution.name,
-            );
-            const rollNumber = education ? education.rollNumber : null;
-            const startMonthYear = education ? education.startMonthYear : null;
-            const endMonthYear = education ? education.endMonthYear : null;
+            const rollNumber = student.rollNumber;
+            const courseStartYear = student.courseStartYear;
+            const courseEndYear = student.courseEndYear;
             const studentInfo = {
                 userId: student.userId,
                 departmentName: department.name,
-                username: student.username,
+                fullName: student.fullName,
                 rollNumber: rollNumber,
                 studentLearningHours: studentLearningHours,
-                startMonthYear: startMonthYear,
-                endMonthYear: endMonthYear,
+                courseStartYear: courseStartYear,
+                courseEndYear: courseEndYear,
             };
             studentDetails.push(studentInfo);
 

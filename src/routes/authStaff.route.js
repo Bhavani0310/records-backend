@@ -27,6 +27,14 @@ router.put(
     authStaffController.handleUpdateStaff,
 );
 
+// Add Student
+router.post(
+    "/student",
+    verifyStaff,
+    verifyRole(["Staff"]),
+    authStaffController.handleAddStudent,
+);
+
 // reset password routes
 router.post("/forgot-password", authStaffController.handleSendResetPassMail);
 router.post(

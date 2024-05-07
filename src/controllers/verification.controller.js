@@ -111,7 +111,7 @@ exports.handleGetVerifyEducationDetails = async (req, res) => {
 
         const educationResponse = {
             userId: user.userId,
-            userName: user.username,
+            fullName: user.fullName,
             educationId: education.educationId,
             degree: education.degree,
             institution: education.institution,
@@ -319,7 +319,7 @@ exports.handleGetVerifyWorkExperienceDetails = async (req, res) => {
 
         const workExperienceResponse = {
             userId: user.userId,
-            userName: user.username,
+            fullName: user.fullName,
             workExperienceId: workExperience.workExperienceId,
             role: workExperience.role,
             companyName: workExperience.companyName,
@@ -537,7 +537,7 @@ exports.handleGetVerifyLicenseCertificationDetails = async (req, res) => {
 
         const licenseCertificationResponse = {
             userId: user.userId,
-            userName: user.username,
+            fullName: user.fullName,
             licenseCertificationId: licenseCertification.licenseCertificationId,
             certificationName: licenseCertification.certificationName,
             organization: licenseCertification.organization,
@@ -745,7 +745,7 @@ exports.handleGetVerifyProjectDetails = async (req, res) => {
 
         const projectResponse = {
             userId: user.userId,
-            userName: user.username,
+            fullName: user.fullName,
             projectId: project.projectId,
             projectName: project.projectName,
             associatedWith: project.associatedWith,
@@ -869,7 +869,7 @@ exports.handleGetVerifyActivityDetails = async (req, res) => {
 
         const activityResponse = {
             userId: user.userId,
-            userName: user.username,
+            fullName: user.fullName,
             activityId: activity.activityId,
             activityName: activity.activityName,
             organisation: activity.organisation,

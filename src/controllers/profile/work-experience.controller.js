@@ -117,14 +117,14 @@ exports.handleAddWorkExperience = async (req, res) => {
                 source: CommonConstant.email.source.tech_team,
                 subject:
                     CommonConstant.email.verificationOfWorkExperience.subject(
-                        userProfile.username,
+                        userProfile.fullName,
                         role,
                         employeeId,
                         companyName,
                     ),
                 htmlData: emailTemplates.workExperienceVerificationRequest(
                     "Experience",
-                    userProfile.username,
+                    userProfile.fullName,
                     role,
                     employeeId,
                     companyName,
@@ -293,14 +293,14 @@ exports.handleUpdateWorkExperience = async (req, res) => {
                 source: CommonConstant.email.source.tech_team,
                 subject:
                     CommonConstant.email.verificationOfWorkExperience.subject(
-                        userProfile.username,
+                        userProfile.fullName,
                         role,
                         employeeId,
                         companyName,
                     ),
                 htmlData: emailTemplates.workExperienceVerificationRequest(
                     "Experience",
-                    userProfile.username,
+                    userProfile.fullName,
                     role,
                     employeeId,
                     companyName,

@@ -90,14 +90,14 @@ exports.handleAddEducation = async (req, res) => {
                 toAddresses: [verifierEmail],
                 source: CommonConstant.email.source.tech_team,
                 subject: CommonConstant.email.verificationOfEducation.subject(
-                    userProfile.username,
+                    userProfile.fullName,
                     degree,
                     branch,
                     institution,
                 ),
                 htmlData: emailTemplates.educationVerificationRequest(
                     "Education",
-                    userProfile.username,
+                    userProfile.fullName,
                     degree,
                     branch,
                     institution,
@@ -239,14 +239,14 @@ exports.handleUpdateEducation = async (req, res) => {
                 toAddresses: [toAddressEmail],
                 source: CommonConstant.email.source.tech_team,
                 subject: CommonConstant.email.verificationOfEducation.subject(
-                    userProfile.username,
+                    userProfile.fullName,
                     degree,
                     branch,
                     institution,
                 ),
                 htmlData: emailTemplates.educationVerificationRequest(
                     "Education",
-                    userProfile.username,
+                    userProfile.fullName,
                     degree,
                     branch,
                     institution,

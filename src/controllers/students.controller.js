@@ -486,12 +486,9 @@ exports.handleGetStudentsHomePage = async (req, res) => {
             }
             learningHoursSum = Math.round(learningHoursSum / 3600);
 
-            const education = student.educations.find(
-                (edu) => edu.institution === institution.name,
-            );
-            const rollNumber = education ? education.rollNumber : null;
-            const startMonthYear = education ? education.startMonthYear : null;
-            const endMonthYear = education ? education.endMonthYear : null;
+            const rollNumber = student.rollNumber;
+            const courseStartYear = student.courseStartYear;
+            const courseEndYear = student.courseEndYear;
 
             const departmentData = await Department.findOne({
                 departmentId: student.student.departmentId,
@@ -516,12 +513,12 @@ exports.handleGetStudentsHomePage = async (req, res) => {
 
             const studentData = {
                 userId: student.student.userId,
-                username: student.student.username,
+                fullName: student.student.fullName,
                 departmentId: student.student.departmentId,
                 institutionId: student.student.institutionId,
                 rollNumber: rollNumber,
-                startMonthYear: startMonthYear,
-                endMonthYear: endMonthYear,
+                courseStartYear: courseStartYear,
+                courseEndYear: courseEndYear,
                 verifiedSkillCount: 0, // Initialize count of verified skills
                 departmentName: null, // Initialize department name
             };
@@ -687,19 +684,16 @@ exports.handleGetStudentDepartmentPageAdmin = async (req, res) => {
         const studentDetails = [];
 
         for (const student of students) {
-            const education = student.educations.find(
-                (edu) => edu.institution === institution.name,
-            );
-            const rollNumber = education ? education.rollNumber : null;
-            const startMonthYear = education ? education.startMonthYear : null;
-            const endMonthYear = education ? education.endMonthYear : null;
+            const rollNumber = student.rollNumber;
+            const courseStartYear = student.courseStartYear;
+            const courseEndYear = student.courseEndYear;
             const studentInfo = {
                 userId: student.userId,
                 departmentName: department.name,
-                username: student.username,
+                fullName: student.fullName,
                 rollNumber: rollNumber,
-                startMonthYear: startMonthYear,
-                endMonthYear: endMonthYear,
+                courseStartYear: courseStartYear,
+                courseEndYear: courseEndYear,
             };
             studentDetails.push(studentInfo);
 
@@ -894,19 +888,16 @@ exports.handleGetStudentDepartmentPageStaff = async (req, res) => {
         const studentDetails = [];
 
         for (const student of students) {
-            const education = student.educations.find(
-                (edu) => edu.institution === institution.name,
-            );
-            const rollNumber = education ? education.rollNumber : null;
-            const startMonthYear = education ? education.startMonthYear : null;
-            const endMonthYear = education ? education.endMonthYear : null;
+            const rollNumber = student.rollNumber;
+            const courseStartYear = student.courseStartYear;
+            const courseEndYear = student.courseEndYear;
             const studentInfo = {
                 userId: student.userId,
                 departmentName: department.name,
-                username: student.username,
+                fullName: student.fullName,
                 rollNumber: rollNumber,
-                startMonthYear: startMonthYear,
-                endMonthYear: endMonthYear,
+                courseStartYear: courseStartYear,
+                courseEndYear: courseEndYear,
             };
             studentDetails.push(studentInfo);
 

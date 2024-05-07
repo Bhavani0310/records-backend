@@ -112,13 +112,13 @@ exports.handleAddLicenseCertification = async (req, res) => {
                 source: CommonConstant.email.source.tech_team,
                 subject:
                     CommonConstant.email.verificationOfLicenseCertification.subject(
-                        userProfile.username,
+                        userProfile.fullName,
                         certificationName,
                         organization,
                     ),
                 htmlData: emailTemplates.licenseCertificateVerificationRequest(
                     "License & Certification",
-                    userProfile.username,
+                    userProfile.fullName,
                     certificationName,
                     organization,
                     "localhost:3000",
@@ -285,13 +285,13 @@ exports.handleUpdateLicenseCertification = async (req, res) => {
                 source: CommonConstant.email.source.tech_team,
                 subject:
                     CommonConstant.email.verificationOfLicenseCertification.subject(
-                        userProfile.username,
+                        userProfile.fullName,
                         certificationName,
                         organization,
                     ),
                 htmlData: emailTemplates.licenseCertificateVerificationRequest(
                     "License & Certification",
-                    userProfile.username,
+                    userProfile.fullName,
                     certificationName,
                     organization,
                     "localhost:3000",

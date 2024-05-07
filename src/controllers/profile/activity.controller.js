@@ -87,13 +87,13 @@ exports.handleAddActivity = async (req, res) => {
                 toAddresses: [verifierEmail],
                 source: CommonConstant.email.source.tech_team,
                 subject: CommonConstant.email.verificationOfActivity.subject(
-                    userProfile.username,
+                    userProfile.fullName,
                     activityName,
                     organisation,
                 ),
                 htmlData: emailTemplates.activityVerificationRequest(
                     "Activity",
-                    userProfile.username,
+                    userProfile.fullName,
                     activityName,
                     organisation,
                     "localhost:3000",
@@ -231,13 +231,13 @@ exports.handleUpdateActivity = async (req, res) => {
                 toAddresses: [toAddressEmail],
                 source: CommonConstant.email.source.tech_team,
                 subject: CommonConstant.email.verificationOfActivity.subject(
-                    userProfile.username,
+                    userProfile.fullName,
                     activityName,
                     organisation,
                 ),
                 htmlData: emailTemplates.activityVerificationRequest(
                     "Activity",
-                    userProfile.username,
+                    userProfile.fullName,
                     activityName,
                     organisation,
                     "localhost:3000",

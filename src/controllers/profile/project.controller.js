@@ -112,13 +112,13 @@ exports.handleAddProject = async (req, res) => {
                 toAddresses: [verifierEmail],
                 source: CommonConstant.email.source.tech_team,
                 subject: CommonConstant.email.verificationOfProject.subject(
-                    userProfile.username,
+                    userProfile.fullName,
                     projectName,
                     associatedWith,
                 ),
                 htmlData: emailTemplates.projectVerificationRequest(
                     "Project",
-                    userProfile.username,
+                    userProfile.fullName,
                     projectName,
                     associatedWith,
                     "localhost:3000",
@@ -279,13 +279,13 @@ exports.handleUpdateProject = async (req, res) => {
                 toAddresses: [toAddressEmail],
                 source: CommonConstant.email.source.tech_team,
                 subject: CommonConstant.email.verificationOfProject.subject(
-                    userProfile.username,
+                    userProfile.fullName,
                     projectName,
                     associatedWith,
                 ),
                 htmlData: emailTemplates.projectVerificationRequest(
                     "Project",
-                    userProfile.username,
+                    userProfile.fullName,
                     projectName,
                     associatedWith,
                     "localhost:3000",
