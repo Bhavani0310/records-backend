@@ -14,9 +14,9 @@ router.put("/progress", learningsController.handleUpdateCourseProgress);
 
 router.put("/goal", learningsController.handleSetLearningGoal);
 
-router.put("/addnotes", learningsController.handleAddNotes);
-router.get("/getnotes", learningsController.handleGetNotes);
-router.put("/updatenotes", learningsController.handleUpdateNotes);
-router.delete("/deletenotes", learningsController.handleDeleteNotes);
+router.post("/notes", learningsController.handleAddNotes);
+router.get("/notes", learningsController.handleGetNotes);
+router.put("/notes", learningsController.handleUpdateNotes);
+router.delete("/notes", learningsController.handleDeleteNotes);
 
 module.exports = router;

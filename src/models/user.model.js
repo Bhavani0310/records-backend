@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
         isEmailVerified: { type: Boolean, default: false },
         goalType: {
             type: String,
-            enum: ["week", "month", "year"],
+            enum: ["Week", "Month", "Year"],
         },
         goalHours: {
             type: Number,

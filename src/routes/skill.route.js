@@ -6,14 +6,12 @@ const skillController = require("../controllers/skill.controller");
 
 // Importing Middlewares
 const upload = require("../middlewares/multer.mw");
-const verifyStaff = require("../middlewares/staff.mw");
-const verifyRole = require("../middlewares/verifyRole.mw");
+const verifySuperAdmin = require("../middlewares/superadmin.mw");
 
 // Create skill route
 router.post(
     "/",
-    verifyStaff,
-    verifyRole(["Administrator", "Staff"]),
+    verifySuperAdmin,
     upload.single("image"),
     skillController.handleCreateSkill,
 );

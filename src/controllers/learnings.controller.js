@@ -69,7 +69,7 @@ exports.handleGetUserLearnings = async (req, res) => {
         const startEndDates = getStartAndEndDate(currentDate);
 
         let userLearningHours = 0;
-        if (userGoalType === "week") {
+        if (userGoalType === "Week") {
             const weeklyLearning = await Daily_Learning.find({
                 userId: userId,
                 date: {
@@ -81,7 +81,7 @@ exports.handleGetUserLearnings = async (req, res) => {
                 (total, learning) => total + learning.learned,
                 0,
             );
-        } else if (userGoalType === "month") {
+        } else if (userGoalType === "Month") {
             const monthlyLearning = await Daily_Learning.find({
                 userId: userId,
                 date: {
@@ -93,7 +93,7 @@ exports.handleGetUserLearnings = async (req, res) => {
                 (total, learning) => total + learning.learned,
                 0,
             );
-        } else if (userGoalType === "year") {
+        } else if (userGoalType === "Year") {
             const yearlyLearning = await Daily_Learning.find({
                 userId: userId,
                 date: {
@@ -468,7 +468,7 @@ exports.handleGetNotes = async (req, res) => {
             });
         }
 
-        const { courseId, videoId, videoTime, notes } = req.body;
+        const { courseId, videoId } = req.query;
 
         const youtubeCourse = await Youtube_Course.findOne({
             authorId: userId,
