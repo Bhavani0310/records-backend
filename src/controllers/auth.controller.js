@@ -260,7 +260,7 @@ exports.handleSendVerificationEmail = async (req, res) => {
             toAddresses: [email],
             source: CommonConstant.email.source.tech_team,
             subject: CommonConstant.email.verificationEmail.subject,
-            htmlData: `<p>Hello User <br/>Welcome to Record<br/> Your verification link <a href="${process.env.EMAIL_BASE_URL}/verify-email/${emailAccessTokenId}">Verfiy Email</a></p>`,
+            htmlData: `<p>Hello User <br/>Welcome to Record<br/> Your verification link <a href="${process.env.STUDENT_WEBSITE}/verify-email/${emailAccessTokenId}">Verfiy Email</a></p>`,
         });
 
         if (isEmailSend) {
