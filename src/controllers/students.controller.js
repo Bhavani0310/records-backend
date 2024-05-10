@@ -150,9 +150,9 @@ const getMoMPerformance = async (userId) => {
 
 exports.handleGetStudentProfile = async (req, res) => {
     try {
-        const { stundetId } = req.params;
-
-        const student = await User.findOne({ userId: stundetId });
+        const { studentId } = req.params;
+        console.log(studentId);
+        const student = await User.findOne({ userId: studentId });
 
         if (!student) {
             return res.status(HttpStatusCode.NotFound).json({
@@ -162,7 +162,7 @@ exports.handleGetStudentProfile = async (req, res) => {
             });
         }
 
-        const userId = stundetId;
+        const userId = studentId;
 
         const userProfileInfoResponse = await User.aggregate([
             {
@@ -516,13 +516,14 @@ exports.handleGetStudentsHomePage = async (req, res) => {
                 fullName: student.student.fullName,
                 departmentId: student.student.departmentId,
                 institutionId: student.student.institutionId,
+                image:student.student.profilePicture,
                 rollNumber: rollNumber,
                 courseStartYear: courseStartYear,
                 courseEndYear: courseEndYear,
                 verifiedSkillCount: 0, // Initialize count of verified skills
                 departmentName: null, // Initialize department name
             };
-
+            
             // Count verified skills in work experiences
             for (const workExp of student.workExperiences) {
                 for (const skill of workExp.skills) {

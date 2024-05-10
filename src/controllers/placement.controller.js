@@ -44,6 +44,7 @@ exports.handleGetPlacementHomePage = async (req, res) => {
 
         const jobs = await Job.find({ institutionId });
 
+       // console.log(jobs);
         const organizationData = {};
         const jobRoleData = [];
 
@@ -55,6 +56,7 @@ exports.handleGetPlacementHomePage = async (req, res) => {
                 appliedCount,
                 hiredCount,
                 postedOn,
+                jobId
             } = job;
 
             // If the organization doesn't exist in the organizationData object, initialize it
@@ -76,6 +78,7 @@ exports.handleGetPlacementHomePage = async (req, res) => {
                 role: jobDesignation,
                 appliedCount,
                 hiredCount,
+                jobId
             });
         }
 
@@ -89,7 +92,7 @@ exports.handleGetPlacementHomePage = async (req, res) => {
         const mostHiringRoles = jobRoleData.sort(
             (a, b) => b.hiredCount - a.hiredCount,
         );
-
+        console.log(mostHiringRoles);
         return res.status(HttpStatusCode.Ok).json({
             status: HttpStatusConstant.OK,
             code: HttpStatusCode.Ok,
