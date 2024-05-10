@@ -5,7 +5,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: ["http://localhost:3000", "https://app.getrecord.in"],
+        origin: [process.env.STUDENT_WEBSITE, process.env.STAFF_WEBSITE],
         methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
         credentials: true,
     }),
