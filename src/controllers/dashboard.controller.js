@@ -698,7 +698,7 @@ exports.handleGetAdminInstitutionDashboard = async (req, res) => {
 
         const institutionId = staff.institutionId;
 
-        const institution = await Institution.findOne({ institutionId });   
+        const institution = await Institution.findOne({ institutionId });
         if (!institution) {
             return res.status(HttpStatusCode.NotFound).json({
                 status: HttpStatusConstant.NOT_FOUND,
@@ -905,9 +905,9 @@ exports.handleGetAdminInstitutionDashboard = async (req, res) => {
             status: HttpStatusConstant.OK,
             code: HttpStatusCode.Ok,
             data: {
-                InstitutionName:institution.name,
+                InstitutionName: institution.name,
                 studentsPlacedThisYear: totalHired,
-                totalJobsPosted: totalJobs, 
+                totalJobsPosted: totalJobs,
                 totalMontlyHoursOfInvolvement,
                 skillsBeingLearntActively: totalCount,
                 activeStudents,
@@ -1138,6 +1138,62 @@ exports.handleGetAdminDepartmentDashboard = async (req, res) => {
                 mostAcquiredSkills: skillWithCount,
                 mostActiveStudents: top10MostActiveStudents,
             },
+        });
+    } catch (error) {
+        console.log(
+            ErrorLogConstant.dashboardController
+                .handleGetAdminDepartmentDashboardErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleUpdateProfile = async (req, res) => {
+    try {
+        const { staffId } = req.params;
+
+        const staff = await Staff.findOne({ staffId });
+
+        if (!staff) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.STAFF_NOT_FOUND,
+            });
+        }
+
+        const { fullName, designation, mobile } = req.body;
+
+        const userValidation = Joi.object({
+            fullName: Joi.string().required(),
+            designation: Joi.string().required(),
+            mobile: Joi.string().required(),
+        });
+
+        const { error } = userValidation.validate(req.body);
+
+        if (error) {
+            return res.status(HttpStatusCode.BadRequest).json({
+                status: HttpStatusConstant.BAD_REQUEST,
+                code: HttpStatusCode.BadRequest,
+                message: error.details[0].message.replace(/"/g, ""),
+            });
+        }
+
+        staff.fullName = fullName;
+        staff.designation = designation;
+        staff.mobile = mobile;
+
+        await staff.save();
+
+        res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.SUCCESS,
+            code: HttpStatusCode.Ok,
+            message: ResponseMessageConstant.PROFILE_UPDATED_SUCCESSFULLY,
         });
     } catch (error) {
         console.log(

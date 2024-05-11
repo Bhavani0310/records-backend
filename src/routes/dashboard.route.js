@@ -27,4 +27,6 @@ router.get(
     dashboardController.handleGetAdminDepartmentDashboard,
 );
 
+router.put("/profile/:staffId", dashboardController.handleUpdateProfile);
+
 module.exports = router;
