@@ -1197,8 +1197,51 @@ exports.handleUpdateProfile = async (req, res) => {
         });
     } catch (error) {
         console.log(
+            ErrorLogConstant.dashboardController.handleUpdateProfileErrorLog,
+            error.message,
+        );
+        res.status(HttpStatusCode.InternalServerError).json({
+            status: HttpStatusConstant.ERROR,
+            code: HttpStatusCode.InternalServerError,
+        });
+    }
+};
+
+exports.handleGetInstitutionUsers = async (req, res) => {
+    try {
+        const { staffId } = req.staffSession;
+
+        const staff = await Staff.findOne({ staffId });
+
+        const institutionId = staff.institutionId;
+
+        const institution = await Institution.findOne({
+            institutionId,
+        });
+        if (!institution) {
+            return res.status(HttpStatusCode.NotFound).json({
+                status: HttpStatusConstant.NOT_FOUND,
+                code: HttpStatusCode.NotFound,
+                message: ResponseMessageConstant.INSTITUTION_NOT_FOUND,
+            });
+        }
+
+        const staffs = await Staff.find({
+            institutionId,
+            staffId: { $ne: staffId },
+        }).select(
+            "-_id -password -__v -institutionId -departmentId -mobile -designation",
+        );
+
+        return res.status(HttpStatusCode.Ok).json({
+            status: HttpStatusConstant.OK,
+            code: HttpStatusCode.Ok,
+            data: staffs,
+        });
+    } catch (error) {
+        console.log(
             ErrorLogConstant.dashboardController
-                .handleGetAdminDepartmentDashboardErrorLog,
+                .handleGetInstitutionUsersErrorLog,
             error.message,
         );
         res.status(HttpStatusCode.InternalServerError).json({

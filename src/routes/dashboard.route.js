@@ -27,6 +27,17 @@ router.get(
     dashboardController.handleGetAdminDepartmentDashboard,
 );
 
-router.put("/profile/:staffId", dashboardController.handleUpdateProfile);
+router.put(
+    "/profile/:staffId",
+    verifyStaff,
+    dashboardController.handleUpdateProfile,
+);
+
+router.get(
+    "/institution/users",
+    verifyStaff,
+    verifyRole(["Administrator"]),
+    dashboardController.handleGetInstitutionUsers,
+);
 
 module.exports = router;

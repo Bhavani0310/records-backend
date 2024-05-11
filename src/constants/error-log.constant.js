@@ -114,6 +114,8 @@ module.exports = {
             "🚀 ~ file: dashboard.controller.js ~ handleGetAdminDepartmentDashboard ~ err",
         handleUpdateProfileErrorLog:
             "🚀 ~ file: dashboard.controller.js ~ handleUpdateProfile ~ err",
+        handleGetInstitutionUsersErrorLog:
+            "🚀 ~ file: dashboard.controller.js ~ handleGetInstitutionUsers ~ err",
     },
     institutionController: {
         handleAddInstitutionErrorLog:
