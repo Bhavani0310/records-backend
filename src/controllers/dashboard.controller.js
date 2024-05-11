@@ -698,8 +698,7 @@ exports.handleGetAdminInstitutionDashboard = async (req, res) => {
 
         const institutionId = staff.institutionId;
 
-        const institution = await Institution.findOne({ institutionId });
-
+        const institution = await Institution.findOne({ institutionId });   
         if (!institution) {
             return res.status(HttpStatusCode.NotFound).json({
                 status: HttpStatusConstant.NOT_FOUND,
@@ -906,8 +905,9 @@ exports.handleGetAdminInstitutionDashboard = async (req, res) => {
             status: HttpStatusConstant.OK,
             code: HttpStatusCode.Ok,
             data: {
+                InstitutionName:institution.name,
                 studentsPlacedThisYear: totalHired,
-                totalJobsPosted: totalJobs,
+                totalJobsPosted: totalJobs, 
                 totalMontlyHoursOfInvolvement,
                 skillsBeingLearntActively: totalCount,
                 activeStudents,

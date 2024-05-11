@@ -43,6 +43,6 @@ router.post(
 );
 
 // Session routes
-router.post("/verify-session", authStaffController.handleVerifiySession);
+router.post("/verify-session", authStaffController.handleVerifySession);
 
 module.exports = router;

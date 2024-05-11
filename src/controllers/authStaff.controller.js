@@ -378,7 +378,6 @@ exports.handleAddStudent = async (req, res) => {
 exports.handleLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
-
         const userValidation = Joi.object({
             email: Joi.string().email().required(),
             password: Joi.string().required(),
@@ -397,7 +396,6 @@ exports.handleLogin = async (req, res) => {
         const staff = await Staff.findOne({
             email,
         });
-
         if (!staff) {
             return res.status(HttpStatusCode.NotFound).json({
                 status: HttpStatusConstant.NOT_FOUND,
@@ -409,7 +407,7 @@ exports.handleLogin = async (req, res) => {
                 password,
                 staff.password,
             );
-
+    
             if (isValidPassword) {
                 const { email, role, staffId } = staff;
                 const generatedAccessToken = await signToken({
@@ -481,7 +479,7 @@ exports.handleLogout = async (req, res) => {
     }
 };
 
-exports.handleVerifiySession = async (req, res) => {
+exports.handleVerifySession = async (req, res) => {
     try {
         if (!req.headers.cookie) {
             return res.status(HttpStatusCode.Unauthorized).json({
@@ -491,7 +489,7 @@ exports.handleVerifiySession = async (req, res) => {
         }
 
         const accessToken = getRecordSignature(req.headers.cookie);
-
+       
         if (!accessToken) {
             return res.status(HttpStatusCode.Unauthorized).json({
                 status: HttpStatusConstant.UNAUTHORIZED,

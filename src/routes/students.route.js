@@ -16,9 +16,9 @@ router.get(
 );
 
 router.get(
-    "/profile/:stundetId",
+    "/profile/:studentId",
     verifyStaff,
-    verifyRole(["Administrator"]),
+    verifyRole(["Administrator","Staff"]),
     studentsController.handleGetStudentProfile,
 );
 
