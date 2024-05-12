@@ -420,7 +420,7 @@ exports.handleLogin = async (req, res) => {
                     generatedAccessToken,
                     {
                         maxAge: 86400000,
-                        httpOnly: true,
+                        httpOnly: false,
                         secure: true,
                     },
                 )
