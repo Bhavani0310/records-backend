@@ -347,10 +347,8 @@ const getMoMPerformance = async (userId) => {
             0,
         );
 
-        // const currentMonthLearningHours = Math.round(currentMonthTotal / 3600);
-        // const previosMonthLearningHours = Math.round(prevMonthTotal / 3600);
-        const currentMonthLearningHours = 40;
-        const previosMonthLearningHours = 100;
+        const currentMonthLearningHours = Math.round(currentMonthTotal / 3600);
+        const previosMonthLearningHours = Math.round(prevMonthTotal / 3600);
 
         if (previosMonthLearningHours == 0 && currentMonthLearningHours == 0)
             return 0;
@@ -389,7 +387,7 @@ exports.handleGetDashboard = async (req, res) => {
         const skillRepository = await getSkillRepository(userId);
 
         const userGoalType = user.goalType;
-        const userGoalHours = user.goalHours;
+        const userGoalHours = user.goalHours || 0;
 
         const currentDate = new Date().toISOString().split("T")[0];
         const startEndDates = getStartAndEndDate(currentDate);
@@ -432,13 +430,17 @@ exports.handleGetDashboard = async (req, res) => {
                 0,
             );
         }
+
+        const goalDonePercentage =
+            userGoalHours === 0
+                ? 0
+                : Math.round((userLearningHours / 3600 / userGoalHours) * 100);
+
         const goal = {
             goalType: userGoalType,
             goalTarget: userGoalHours,
             goalDone: Math.round(userLearningHours / 3600),
-            goalDonePercentage: Math.round(
-                (userLearningHours / 3600 / userGoalHours) * 100,
-            ),
+            goalDonePercentage,
         };
 
         const learningActivities = await getlearningActivites(userId);
@@ -1229,10 +1231,8 @@ exports.handleGetInstitutionUsers = async (req, res) => {
         const staffs = await Staff.find({
             institutionId,
             staffId: { $ne: staffId },
-        }).select(
-            "-_id -password -__v -institutionId -mobile ",
-        );
-       
+        }).select("-_id -password -__v -institutionId -mobile ");
+
         return res.status(HttpStatusCode.Ok).json({
             status: HttpStatusConstant.OK,
             code: HttpStatusCode.Ok,
