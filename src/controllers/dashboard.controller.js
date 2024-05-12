@@ -1230,9 +1230,9 @@ exports.handleGetInstitutionUsers = async (req, res) => {
             institutionId,
             staffId: { $ne: staffId },
         }).select(
-            "-_id -password -__v -institutionId -departmentId -mobile -designation",
+            "-_id -password -__v -institutionId -mobile ",
         );
-
+       
         return res.status(HttpStatusCode.Ok).json({
             status: HttpStatusConstant.OK,
             code: HttpStatusCode.Ok,
