@@ -407,7 +407,7 @@ exports.handleLogin = async (req, res) => {
                 password,
                 staff.password,
             );
-    
+
             if (isValidPassword) {
                 const { email, role, staffId } = staff;
                 const generatedAccessToken = await signToken({
@@ -420,9 +420,8 @@ exports.handleLogin = async (req, res) => {
                     generatedAccessToken,
                     {
                         maxAge: 86400000,
-                        httpOnly: false,
+                        httpOnly: true,
                         secure: true,
-                        sameSite: "none",
                     },
                 )
                     .status(HttpStatusCode.Ok)
@@ -489,7 +488,7 @@ exports.handleVerifySession = async (req, res) => {
         }
 
         const accessToken = getRecordSignature(req.headers.cookie);
-       
+
         if (!accessToken) {
             return res.status(HttpStatusCode.Unauthorized).json({
                 status: HttpStatusConstant.UNAUTHORIZED,
